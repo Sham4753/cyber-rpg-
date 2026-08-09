@@ -29,6 +29,7 @@ const CyberEngine = (function() {
         },
         storyProgress: {},
         dailyRewardClaimed: false,
+        lives: 3,
         totalPlayTime: 0,
         perfectRuns: 0
     };
@@ -313,6 +314,31 @@ const CyberEngine = (function() {
         }
     };
 
+
+    // ═══════════════════════════════════════════════════════════
+    // SAFE EVAL - Secure Code Execution
+    // ═══════════════════════════════════════════════════════════
+    function safeEval(code, allowedCommands) {
+        allowedCommands = allowedCommands || ['console', 'Math', 'Array', 'Object', 'String', 'Number', 'JSON', 'Date', 'parseInt', 'parseFloat'];
+        var dangerous = ['eval', 'Function', 'document', 'window', 'localStorage', 'sessionStorage', 'fetch', 'XMLHttpRequest', 'WebSocket', 'setTimeout', 'setInterval', 'alert', 'confirm', 'prompt', 'location', 'history', 'open', 'close'];
+        for (var i = 0; i < dangerous.length; i++) {
+            if (code.indexOf(dangerous[i]) !== -1) {
+                throw new Error('🚫 الأمر "' + dangerous[i] + '" محظور للأمان!');
+            }
+        }
+        var sandbox = {};
+        for (var i = 0; i < allowedCommands.length; i++) {
+            var parts = allowedCommands[i].split('.');
+            var obj = window;
+            for (var j = 0; j < parts.length; j++) {
+                if (obj[parts[j]]) obj = obj[parts[j]];
+            }
+            sandbox[parts[parts.length - 1]] = obj;
+        }
+        var fn = new Function(Object.keys(sandbox).join(','), '"use strict"; ' + code);
+        return fn.apply(null, Object.values(sandbox));
+    }
+
     // ═══════════════════════════════════════════════════════════
     // AUDIO ENGINE
     // ═══════════════════════════════════════════════════════════
@@ -397,14 +423,6 @@ const CyberEngine = (function() {
             console.warn('Storage unavailable, using defaults');
         }
         return { ...DEFAULT_STATE };
-        try {
-            const saved = localStorage.getItem('cyberRPG_state');
-            if (saved) {
-                const parsed = JSON.parse(saved);
-                return { ...DEFAULT_STATE, ...parsed };
-            }
-        } catch(e) {}
-        return { ...DEFAULT_STATE };
     }
 
     function saveState(state) {
@@ -413,9 +431,6 @@ const CyberEngine = (function() {
         } catch(e) {
             console.warn('Storage save failed');
         }
-        try {
-            localStorage.setItem('cyberRPG_state', JSON.stringify(state));
-        } catch(e) {}
     }
 
     let state = loadState();
@@ -812,6 +827,40 @@ const CyberEngine = (function() {
         saveState(state);
 
         return reward;
+    }
+
+
+    // ═══════════════════════════════════════════════════════════
+    // LIVES SYSTEM
+    // ═══════════════════════════════════════════════════════════
+    var MAX_LIVES = 3;
+
+    function loseLife() {
+        state.lives = (state.lives || MAX_LIVES) - 1;
+        saveState(state);
+        updateLivesUI();
+        if (state.lives <= 0) {
+            showGameOver();
+            return false;
+        }
+        return true;
+    }
+
+    function showGameOver() {
+        var overlay = document.createElement('div');
+        overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;';
+        overlay.innerHTML = '<div style="font-size:5rem;">💀</div><h2 style="color:#ff3333;font-family:var(--font-display);margin:20px 0;">GAME OVER</h2><p style="color:rgba(255,255,255,0.7);">فقدت كل حياتك!</p><button class="cyber-btn primary" onclick="location.reload()" style="margin-top:20px;">إعادة المحاولة 🔄</button>';
+        document.body.appendChild(overlay);
+        audio.fail();
+    }
+
+    function updateLivesUI() {
+        var lives = state.lives || MAX_LIVES;
+        var hearts = '';
+        for (var i = 0; i < lives; i++) hearts += '❤️';
+        for (var i = 0; i < MAX_LIVES - lives; i++) hearts += '🖤';
+        var el = document.getElementById('hud-lives');
+        if (el) el.innerHTML = hearts;
     }
 
     // ═══════════════════════════════════════════════════════════
