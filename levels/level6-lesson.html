@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 6: Boss Fight: PHANTOM</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 6">LEVEL 6</h1>
+            <p class="cyber-subtitle">👹 مواجهة العدو النهائي</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">6</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 6
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "الأداة جاهزة. الشبكة تهتز. PHANTOM يعرف أنك قادم!", "simple": "PHANTOM قدامك! المعركة النهائية!", "delay": 1000}, {"avatar": "💀", "speaker": "PHANTOM", "text": "\"أهلاً Agent... لقد كنتُ أنتظر هذه اللحظة منذ سنوات.\"", "simple": "PHANTOM يتحداك!", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "🐉 المهمة النهائية: استخدم كل ما تعلمته لإيقاف PHANTOM!", "simple": "استخدم كل شيء تعلمته!", "delay": 1500}]);
+            lesson.addConcept({"title": "تجميع كل شيء: البرمجة المتكاملة", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:pulse 2s infinite;\">⚔️</div><div style=\"margin-top:10px; color:var(--neon-red);\">Boss Fight = اجمع كل أدواتك!</div></div><style>@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}</style>", "analogy": {"game": "Boss Fight مثل المرحلة الأخيرة: لازم تستخدم كل القوى اللي جمعتها!", "tech": "تجميع المفاهيم: Variables, If/Else, Loops, Functions في برنامج واحد", "real": "مثل امتحان نهائي: يختبر كل شيء تعلمته في المادة"}, "explanation": {"simple": "المعركة النهائية تحتاج كل شيء: أوامر، شروط، حلقات، دوال!", "normal": "في المعركة النهائية، ستستخدم كل ما تعلمته: Terminal, Python, If/Else, Loops, Functions.", "technical": "Integration: دمج multiple programming paradigms لبناء حل متكامل لمهمة معقدة."}, "codeExample": "def final_attack():\\n    password = 'PHANTOM'\\n    for layer in range(7, 0, -1):\\n        if layer > 3:\\n            print(f'💥 تحطيم الطبقة {layer}')\\n        else:\\n            print(f'🔥 الطبقة {layer} ضعيفة!')\\n    return '✅ PHANTOM مهزوم!'\\n\\nprint(final_attack())", "tips": "💡 لا تستسلم! كل خطأ هو درس. كل محاولة تقربك من النصر!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "def hack_phantom():", "type": "command", "explanation": "💡 الدالة النهائية"}, {"text": "...    tools = ['terminal', 'python', 'loops']", "type": "output", "explanation": "✅ نجمع الأدوات"}, {"text": "...    for tool in tools:", "type": "output", "explanation": "✅ نستخدم كل أداة"}, {"text": "...        print(f'استخدام {tool}...')", "type": "output", "explanation": "🎉 PHANTOM يضعف!"}, {"text": "...    return 'PHANTOM مهزوم!'", "type": "output", "explanation": "🏆 النصر!"}]});
+            lesson.addPractice({"task": "اكتب برنامج كامل: دالة تفحص 5 طبقات وتهزم PHANTOM إذا وصلت للطبقة 1", "prompt": "python>>> ", "hints": ["💡 def fight_phantom():", "💡 for layer in range(5, 0, -1):", "💡 if layer == 1: return 'نصر!'"]});
+            lesson.addChallenge([{"question": "ما هي أدواتك في هذه المعركة؟", "options": ["Terminal فقط", "Terminal + Python + If/Else + Loops + Functions", "الماوس فقط", "الإنترنت فقط"], "correct": 1}, {"question": "ما هو range(7, 0, -1)؟", "options": ["من 0 إلى 7", "من 7 إلى 1 تنازلي", "من 1 إلى 7", "7 مرات"], "correct": 1}, {"question": "لماذا نستخدم For في المعركة؟", "options": ["للتصميم", "لفحص كل الطبقات تلقائياً", "للطباعة", "للحذف"], "correct": 1}, {"question": "ما معنى 'تجميع المفاهيم'؟", "options": ["حذف الكود", "استخدام كل ما تعلمته معاً", "نسيان الدروس", "نسخ ولصق"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

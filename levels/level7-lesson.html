@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 7: Lists & Dictionaries</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 7">LEVEL 7</h1>
+            <p class="cyber-subtitle">📦 ترتيب البيانات المشتتة</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">7</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 7
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "بعد هزيمة PHANTOM... اكتشفت شريحة ذاكرة مخفية!", "simple": "لقيت ذاكرة مخفية!", "delay": 1000}, {"avatar": "📦", "speaker": "الذاكرة", "text": "البيانات مشتتة! قوائم مبعثرة وقواميس مشفرة في كل مكان!", "simple": "البيانات مبعثرة! لازم نرتبها!", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "📦 المهمة: استخدم Lists و Dictionaries لترتيب البيانات وكشف الحقيقة!", "simple": "تعلم القوائم والقواميس عشان ترتب البيانات!", "delay": 1500}]);
+            lesson.addConcept({"title": "Lists & Dictionaries: خزائن البيانات", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:float 3s infinite;\">📦</div><div style=\"margin-top:10px; color:var(--neon-green);\">List = صف دراسي | Dict = خزانة ملفات!</div></div><style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>", "analogy": {"game": "List مثل حقيبة أدوات: تحط فيها أدواتك بترتيب! Dict مثل خريطة: اسم + موقع!", "tech": "List: مجموعة مرتبة. Dict: مجموعة مفتاح-قيمة للبحث السريع.", "real": "List مثل قائمة التسوق. Dict مثل دفتر العناوين (اسم: رقم)."}, "explanation": {"simple": "List تحط فيها أشياء بترتيب. Dict تحط فيها أشياء باسم عشان تلاقيها بسرعة!", "normal": "List: مجموعة مرتبة قابلة للتعديل. Dictionary: مجموعة من أزواج key-value للوصول السريع.", "technical": "List: dynamic array, O(n) lookup. Dict: hash table, O(1) lookup. يُستخدمان لتخزين وهيكلة البيانات."}, "codeExample": "# List\\nagents = ['Zero', 'Alpha', 'Beta']\\nprint(agents[0])  # Zero\\n\\n# Dict\\nagent_levels = {'Zero': 999, 'Alpha': 50}\\nprint(agent_levels['Zero'])  # 999", "tips": "💡 List تبدأ من 0! agents[0] = أول عنصر. Dict: اسم['المفتاح'] = القيمة!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "agents = ['Zero', 'Phantom', 'Omega']", "type": "command", "explanation": "💡 قائمة بالعملاء"}, {"prompt": ">>>", "text": "print(agents[0])", "type": "command", "explanation": "💡 نطبع الأول"}, {"text": "Zero", "type": "output", "explanation": "✅ الفهرس 0 = أول عنصر"}, {"prompt": ">>>", "text": "data = {'Omega': 999, 'Alpha': 50}", "type": "command", "explanation": "💡 قاموس بالمستويات"}, {"text": "999", "type": "output", "explanation": "🎹 الوصول السريع!"}]});
+            lesson.addPractice({"task": "اكتب Dict يحتوي على 3 عملاء ومستوياتهم، ثم اطبع مستوى 'Omega'", "prompt": "python>>> ", "hints": ["💡 agents = {'Omega': 999, 'Alpha': 50, 'Beta': 75}", "💡 print(agents['Omega'])", "💡 الناتج يجب أن يكون 999"]});
+            lesson.addChallenge([{"question": "ما الفرق بين List و Dictionary؟", "options": ["لا فرق", "List بترتيب، Dict بمفتاح", "List أسرع", "Dict أصغر"], "correct": 1}, {"question": "ما هو فهرس أول عنصر في List؟", "options": ["1", "0", "-1", "10"], "correct": 1}, {"question": "كيف تصل لقيمة في Dictionary؟", "options": ["dict.0", "dict['key']", "dict(0)", "dict.key"], "correct": 1}, {"question": "لماذا نستخدم Dictionary في الأمن السيبراني؟", "options": ["للتصميم", "للبحث السريع عن البيانات", "للألعاب", "للحذف"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 10: API Hacking</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 10">LEVEL 10</h1>
+            <p class="cyber-subtitle">🌐 اختراق الخوادم عبر API</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">10</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 10
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "Sector 7 يحتوي على خوادم متصلة بالعالم الخارجي...", "simple": "الخوادم متصلة بالعالم!", "delay": 1000}, {"avatar": "🌐", "speaker": "النظام", "text": "OMEGA يستخدم APIs للتحكم في شبكته. إذا استطعنا فهمها...", "simple": "OMEGA يستخدم APIs! لازم نفهمها!", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "🌐 المهمة: اخترق API OMEGA واستخرج البيانات قبل أن يُغلق الباب!", "simple": "تعلم API عشان تاخذ البيانات!", "delay": 1500}]);
+            lesson.addConcept({"title": "API: جسر البيانات", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:float 3s infinite;\">🌐</div><div style=\"margin-top:10px; color:var(--neon-green);\">API = نادل المطعم: يطلب لك البيانات!</div></div><style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>", "analogy": {"game": "API مثل 'زر الطلب' في اللعبة: تضغطه يجيب لك معلومات من السيرفر!", "tech": "API (Application Programming Interface) هي واجهة تتيح للبرامج التواصل مع بعضها.", "real": "API مثل نادل المطعم: أنت (العميل) تطلب، النادل (API) يجيب من المطبخ (السيرفر)."}, "explanation": {"simple": "API هي طريقة تطلب فيها بيانات من موقع أو تطبيق. مثل تطلب قائمة الطعام!", "normal": "API تتيح للتطبيقات التواصل مع بعضها. نستخدم requests في Python لإرسال طلبات GET/POST واستلام JSON.", "technical": "API RESTful تستخدم HTTP methods: GET (read), POST (create), PUT (update), DELETE (remove). تُرجع JSON/XML."}, "codeExample": "import requests\\n\\nurl = 'https://omega.com/api/agents'\\nresponse = requests.get(url)\\n\\n# البيانات بصيغة JSON\\ndata = response.json()\\nprint(data['status'])  # ARMED", "tips": "💡 GET = اقرأ. POST = أنشئ. PUT = حدّث. DELETE = احذف. JSON = صيغة بيانات!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "import requests", "type": "command", "explanation": "💡 نستورد مكتبة الطلبات"}, {"prompt": ">>>", "text": "r = requests.get('https://api.omega.com/status')", "type": "command", "explanation": "💡 نطلب حالة السيرفر"}, {"text": "<Response [200]>", "type": "output", "explanation": "✅ 200 = نجاح!"}, {"prompt": ">>>", "text": "print(r.json())", "type": "command", "explanation": "💡 نحول لـ JSON"}, {"text": "{'status': 'ARMED', 'level': 999}", "type": "output", "explanation": "🎉 حصلنا على البيانات!"}]});
+            lesson.addPractice({"task": "اكتب كود يطلب بيانات من API ويطبع حالة 'OMEGA' (استخدم requests.get)", "prompt": "python>>> ", "hints": ["💡 import requests", "💡 r = requests.get('URL')", "💡 print(r.json()['status'])"]});
+            lesson.addChallenge([{"question": "ما هو API؟", "options": ["لعبة", "واجهة برمجة للتواصل بين التطبيقات", "ملف", "صورة"], "correct": 1}, {"question": "ما الفرق بين GET و POST؟", "options": ["لا فرق", "GET للقراءة، POST للإنشاء", "GET أسرع", "POST أصغر"], "correct": 1}, {"question": "ماذا يعني Response 200؟", "options": ["خطأ", "نجاح", "تحذير", "محظور"], "correct": 1}, {"question": "لماذا نستخدم APIs في الأمن السيبراني؟", "options": ["للتصميم", "لاستخراج البيانات من الأنظمة", "للألعاب", "للحذف"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

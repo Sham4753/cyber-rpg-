@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 1: Terminal Basics</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 1">LEVEL 1</h1>
+            <p class="cyber-subtitle">🔓 أوامر Linux الأساسية</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'linux', level: 1
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "الساعة 03:47 صباحاً... تستيقظ على صوت إنذار أحمر!", "simple": "صحيت بالليل! في إنذار أحمر!", "delay": 1000}, {"avatar": "📱", "speaker": "النظام", "text": "رسالة مشفرة: \"Agent... اخترقوا الشبكة. نحتاجك الآن.\"", "simple": "جاتك رسالة: \"ساعدنا!\"", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "🔓 المهمة الأولى: تعلم أوامر Linux لتفتح الباب الإلكتروني!", "simple": "تعلم أوامر الكمبيوتر عشان تفتح الباب!", "delay": 1500}]);
+            lesson.addConcept({"title": "ما هو الـ Terminal؟", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:float 3s infinite;\">💻</div><div style=\"margin-top:10px; color:var(--neon-green);\">Terminal = باب سحري للكمبيوتر!</div></div><style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>", "analogy": {"game": "Terminal مثل شات تتكلم فيه مع الكمبيوتر!", "tech": "Terminal هو واجهة سطر الأوامر (CLI)", "real": "Terminal مثل التحدث مع سائق التاكسي"}, "explanation": {"simple": "الـ Terminal هو مكان تكتب فيه أوامر للكمبيوتر!", "normal": "الـ Terminal هو واجهة نصية تتيح لك التحكم في الكمبيوتر بكتابة أوامر.", "technical": "Terminal هو shell يفسر الأوامر النصية ويترجمها لتعليمات للنواة."}, "codeExample": "$ pwd\\n/home/agent\\n\\n$ ls\\nsecret_room  notes.txt\\n\\n$ cd secret_room\\n$ cat password.txt", "tips": "💡 Terminal = CMD (ويندوز) = Terminal (ماك/لينكس)"});
+            lesson.addDemo({"steps": [{"prompt": "$", "text": "pwd", "type": "command", "explanation": "💡 pwd = Print Working Directory = وين أنا؟"}, {"text": "/home/agent", "type": "output", "explanation": "✅ أنت في مجلد agent"}, {"prompt": "$", "text": "ls", "type": "command", "explanation": "💡 ls = List = عرضلي شو موجود"}, {"text": "secret_room  notes.txt  readme.md", "type": "output", "explanation": "✅ في 3 ملفات"}, {"prompt": "$", "text": "cd secret_room", "type": "command", "explanation": "💡 cd = Change Directory = ادخل الغرفة"}, {"text": "دخلت إلى: /home/agent/secret_room", "type": "output", "explanation": "✅ دخلت الغرفة السرية!"}, {"prompt": "$", "text": "cat password.txt", "type": "command", "explanation": "💡 cat = اقرأ الملف"}, {"text": "🔓 كلمة المرور: CYBER_AGENT_2024", "type": "output", "explanation": "🎉 وجدت كلمة المرور!"}]});
+            lesson.addPractice({"task": "استخدم الأوامر لتجد كلمة المرور! (ls → cd secret_room → ls → cat password.txt)", "prompt": "agent@cyber-rpg:~$ ", "hints": ["💡 الخطوة 1: اكتب ls", "💡 الخطوة 2: اكتب cd secret_room", "💡 الخطوة 3: اكتب cat password.txt"]});
+            lesson.addChallenge([{"question": "ما هو أمر معرفة المجلد الحالي؟", "options": ["ls", "pwd", "cd", "cat"], "correct": 1}, {"question": "أي أمر يُستخدم لعرض محتوى ملف؟", "options": ["ls", "cd", "cat", "clear"], "correct": 2}, {"question": "للانتقال إلى مجلد فرعي نستخدم:", "options": ["ls folder", "cd folder", "cat folder", "pwd folder"], "correct": 1}, {"question": "ما الفرق بين Terminal و GUI؟", "options": ["Terminal أبطأ", "Terminal أسرع للمهام المتكررة", "لا فرق", "GUI للمحترفين"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

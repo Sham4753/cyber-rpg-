@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 11: Web Scraping</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 11">LEVEL 11</h1>
+            <p class="cyber-subtitle">🕷️ قراءة ما لا يُقرأ</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">11</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 11
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "OMEGA_CORP لديها موقع ويب عام... يظنون أنه آمن!", "simple": "موقعهم يظنونه آمن!", "delay": 1000}, {"avatar": "🕷️", "speaker": "النظام", "text": "لكن العنكبوت (Web Scraper) يستطيع قراءة كل شيء مخفي في HTML!", "simple": "العنكبوت يلاقي كل شي مخفي!", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "🕷️ المهمة: استخدم BeautifulSoup لاستخراج أسرارهم من الموقع!", "simple": "تعلم Web Scraping عشان تسرق البيانات من الموقع!", "delay": 1500}]);
+            lesson.addConcept({"title": "Web Scraping: العنكبوت الرقمي", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:float 3s infinite;\">🕷️</div><div style=\"margin-top:10px; color:var(--neon-green);\">Scraper = عنكبوت يمشي على المواقع ويجمع البيانات!</div></div><style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>", "analogy": {"game": "Scraper مثل 'جمع الموارد' في اللعبة: يمشي على الخريطة ويجمع كل شيء تلقائياً!", "tech": "Web Scraping يستخدم requests لجلب HTML وBeautifulSoup لتحليله واستخراج البيانات.", "real": "Scraper مثل روبوت يقرأ الجريدة ويقص الأخبار المهمة لك!"}, "explanation": {"simple": "Web Scraping يخلي البرنامج يزور موقع ويقرأ كل المعلومات وياخذ اللي يبغاه!", "normal": "Web Scraping: جلب صفحة HTML وتحليلها لاستخراج بيانات منظمة (tables, links, text) باستخدام BeautifulSoup.", "technical": "Pipeline: requests.get(url) → BeautifulSoup(html, 'html.parser') → soup.find/find_all() → extract .text/attributes. يتطلب فهم DOM وCSS selectors."}, "codeExample": "import requests\\nfrom bs4 import BeautifulSoup\\n\\nurl = 'https://omega.com'\\nresponse = requests.get(url)\\nsoup = BeautifulSoup(response.text, 'html.parser')\\n\\n# استخراج العناوين\\ntitles = soup.find_all('h1')\\nfor t in titles:\\n    print(t.text)", "tips": "💡 find() = أول تطابق. find_all() = كل التطابقات. .text = استخرج النص فقط!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "import requests", "type": "command", "explanation": "💡 نستورد الطلبات"}, {"prompt": ">>>", "text": "from bs4 import BeautifulSoup", "type": "command", "explanation": "💡 نستورد المحلل"}, {"prompt": ">>>", "text": "soup = BeautifulSoup('<h1>OMEGA</h1>', 'html.parser')", "type": "command", "explanation": "💡 نحلل HTML"}, {"prompt": ">>>", "text": "soup.find('h1').text", "type": "command", "explanation": "💡 نستخرج النص"}, {"text": "'OMEGA'", "type": "output", "explanation": "🎉 استخرجنا البيانات!"}]});
+            lesson.addPractice({"task": "اكتب كود BeautifulSoup يستخرج النص من: '<div class=\"secret\">KEY: XK-99</div>'", "prompt": "python>>> ", "hints": ["💡 soup = BeautifulSoup(html, 'html.parser')", "💡 soup.find('div', class_='secret')", "💡 .text للحصول على النص"]});
+            lesson.addChallenge([{"question": "ما هي مكتبة Python الشهيرة لـ Web Scraping؟", "options": ["Requests", "BeautifulSoup", "JSON", "Regex"], "correct": 1}, {"question": "ما الفرق بين find() و find_all()؟", "options": ["لا فرق", "find = أول تطابق, find_all = كل التطابقات", "find = كل", "find_all = أول"], "correct": 1}, {"question": "كيف تستخرج النص من عنصر HTML؟", "options": [".html", ".text", ".content", ".value"], "correct": 1}, {"question": "لماذا Web Scraping مفيد في الأمن السيبراني؟", "options": ["للتصميم", "لجمع المعلومات من المواقع العامة", "للألعاب", "للحذف"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

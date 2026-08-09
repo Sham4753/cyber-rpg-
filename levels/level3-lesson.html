@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 3: If/Else & Firewall</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 3">LEVEL 3</h1>
+            <p class="cyber-subtitle">🛡️ اكتب شروط الدفاع</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">3</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 3
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "الإحداثيات تقودك إلى خادم محمي بجدار ناري ذكي!", "simple": "في جدار ناري قدامك!", "delay": 1000}, {"avatar": "🔥", "speaker": "الجدار الناري", "text": "الجدار يتكيف مع كل محاولة! يجب أن تكتب شروطاً ذكية!", "simple": "الجدار يتغير! لازم شروط ذكية!", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "🛡️ المهمة: اكتب If/Else لتجاوز دفاعاتهم واحداً تلو الآخر!", "simple": "تعلم If/Else عشان تتجاوزه!", "delay": 1500}]);
+            lesson.addConcept({"title": "If/Else: قرارات الكمبيوتر", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:float 3s infinite;\">🚦</div><div style=\"margin-top:10px; color:var(--neon-green);\">If/Else = إشارة المرور للكمبيوتر!</div></div><style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>", "analogy": {"game": "If/Else مثل لعبة 'هل أنت جاهز؟' إذا قلت نعم تكمل، لا ترجع!", "tech": "If/Else هي بنية تحكم تسمح للبرنامج باتخاذ قرارات بناءً على شروط", "real": "If/Else مثل إشارة المرور: إذا أخضر امشي، إذا أحمر توقف"}, "explanation": {"simple": "If/Else يخلي الكمبيوتر ياخذ قرارات: إذا صح سوي كذا، إذا لا سوي كذا!", "normal": "If/Else تسمح للبرنامج بتنفيذ كود مختلف بناءً على شرط معين (True/False).", "technical": "If/Else هي بنية تحكم شرطية (conditional control structure) تُقيّم تعبير منطقي وتنفذ كتلة الكود المناسبة."}, "codeExample": "password = input('أدخل كلمة المرور: ')\\n\\nif password == 'CYBER2024':\\n    print('✅ تم الدخول!')\\nelse:\\n    print('❌ كلمة المرور خاطئة!')", "tips": "💡 == للمقارنة، = للتخزين! لا تخلط بينهم!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "attack_level = 5", "type": "command", "explanation": "💡 مستوى الهجوم = 5"}, {"prompt": ">>>", "text": "if attack_level > 3:", "type": "command", "explanation": "💡 إذا الهجوم أعلى من 3..."}, {"text": "...    print('🛡️ تفعيل الدفاع القصوى!')", "type": "output", "explanation": "✅ نفّذ الدفاع القصوى"}, {"prompt": ">>>", "text": "else:", "type": "command", "explanation": "💡 وإلا..."}, {"text": "...    print('🟢 الدفاع العادي كافٍ')", "type": "output", "explanation": "✅ الدفاع العادي"}]});
+            lesson.addPractice({"task": "اكتب If/Else يتحقق إذا كلمة المرور 'OMEGA' يقول 'ممنوع' وإلا 'مسموح'", "prompt": "python>>> ", "hints": ["💡 password = 'OMEGA'", "💡 if password == 'OMEGA':", "💡 else: print('مسموح')"]});
+            lesson.addChallenge([{"question": "ما هو الغرض من If/Else؟", "options": ["تكرار الكود", "اتخاذ قرارات", "حذف الملفات", "طباعة نص"], "correct": 1}, {"question": "ما الفرق بين = و == في Python؟", "options": ["لا فرق", "= للتخزين، == للمقارنة", "= للمقارنة", "== للتخزين"], "correct": 1}, {"question": "if x > 5: ماذا يعني؟", "options": ["x يساوي 5", "x أكبر من 5", "x أصغر من 5", "x ليس 5"], "correct": 1}, {"question": "كيف تكتب 'إذا لا' في Python؟", "options": ["otherwise", "else", "ifnot", "except"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

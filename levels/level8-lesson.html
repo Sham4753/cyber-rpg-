@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 8: File Operations</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 8">LEVEL 8</h1>
+            <p class="cyber-subtitle">📁 عملية السرقة الإلكترونية</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">8</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 8
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "بعد اكتشاف Sector 7... وجدت خادماً فرعياً يحتوي على ملفات OMEGA!", "simple": "لقيت ملفات سرية!", "delay": 1000}, {"avatar": "📁", "speaker": "النظام", "text": "الملفات مشفرة ومحمية، لكنك تعلمت كيف تتعامل معها!", "simple": "الملفات محمية! لازم نسرقها!", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "📁 المهمة: اخترق نظام الملفات واسرق config.bak!", "simple": "تعلم التعامل مع الملفات عشان تسرق البيانات!", "delay": 1500}]);
+            lesson.addConcept({"title": "الملفات: قراءة وكتابة البيانات", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:float 3s infinite;\">📁</div><div style=\"margin-top:10px; color:var(--neon-green);\">File = صندوق بريد إلكتروني!</div></div><style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>", "analogy": {"game": "الملفات مثل صناديق الحفظ في اللعبة: تفتحها تقرأ، تكتب فيها تحفظ!", "tech": "الملفات تُستخدم لقراءة وكتابة البيانات بشكل دائم على القرص.", "real": "الملفات مثل دفتر ملاحظات: تفتحه، تقرأ، تكتب، تغلقه."}, "explanation": {"simple": "تقدر تفتح ملف، تقرأ منه، تكتب فيه، وتسكره!", "normal": "Python تتيح قراءة الملفات (open/read) وكتابتها (write/append) باستخدام with statement.", "technical": "File I/O: open(filename, mode) حيث mode = 'r' read, 'w' write, 'a' append, 'rb' binary. with statement يضمن الإغلاق التلقائي."}, "codeExample": "# قراءة ملف\\nwith open('secret.txt', 'r') as f:\\n    content = f.read()\\n    print(content)\\n\\n# كتابة ملف\\nwith open('hack.log', 'w') as f:\\n    f.write('✅ تم الاختراق!')", "tips": "💡 'r' = قراءة، 'w' = كتابة (تحذف القديم!)، 'a' = إضافة. with = يغلق الملف تلقائياً!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "with open('config.bak', 'r') as f:", "type": "command", "explanation": "💡 نفتح الملف للقراءة"}, {"text": "...    data = f.read()", "type": "output", "explanation": "✅ نقرأ كل المحتوى"}, {"text": "...    print(data[:50])", "type": "output", "explanation": "✅ نطبع أول 50 حرف"}, {"text": "OMEGA_STATUS=ARMED\\nSECTOR=7...", "type": "output", "explanation": "🎉 وجدنا معلومات سرية!"}, {"prompt": ">>>", "text": "with open('stolen.txt', 'w') as f:", "type": "command", "explanation": "💡 نكتب ملف جديد"}]});
+            lesson.addPractice({"task": "اكتب كود يفتح ملف 'secret.txt' ويقرأ محتواه ويطبعه", "prompt": "python>>> ", "hints": ["💡 with open('secret.txt', 'r') as f:", "💡 content = f.read()", "💡 print(content)"]});
+            lesson.addChallenge([{"question": "ما وظيفة with open() as f؟", "options": ["تصميم", "فتح ملف وإغلاقه تلقائياً", "حذف ملف", "طباعة نص"], "correct": 1}, {"question": "ما الفرق بين 'w' و 'r'؟", "options": ["لا فرق", "'w' للكتابة، 'r' للقراءة", "'w' أسرع", "'r' يحذف"], "correct": 1}, {"question": "ماذا يفعل f.read()؟", "options": ["يكتب", "يقرأ كل المحتوى", "يحذف", "يغلق"], "correct": 1}, {"question": "لماذا نستخدم with بدل open() فقط؟", "options": ["للتصميم", "لإغلاق الملف تلقائياً", "للألعاب", "للحذف"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

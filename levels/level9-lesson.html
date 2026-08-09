@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 9: Regex Patterns</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 9">LEVEL 9</h1>
+            <p class="cyber-subtitle">👁️ عين الصقر ترى كل نمط</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">9</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 9
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "Sector 7 يحتوي على ملايين السجلات... كيف نجد الإبرة في الكومة؟", "simple": "ملايين السجلات! كيف نلقى المهم؟", "delay": 1000}, {"avatar": "👁️", "speaker": "النظام", "text": "الجواب: Regular Expressions! عين الصقر التي ترى كل نمط!", "simple": "الجواب: Regex! عين الصقر!", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "👁️ المهمة: استخدم Regex لاستخراج أسرار OMEGA من بحر البيانات!", "simple": "تعلم Regex عشان تلاقي الأسرار!", "delay": 1500}]);
+            lesson.addConcept({"title": "Regex: البحث الذكي", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:float 3s infinite;\">👁️</div><div style=\"margin-top:10px; color:var(--neon-green);\">Regex = نظارة سحرية تلاقي أي نمط!</div></div><style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>", "analogy": {"game": "Regex مثل 'بحث متقدم' في اللعبة: تبحث عن 'سيف*' يلاقي سيف1، سيف2...", "tech": "Regex (Regular Expressions) هي لغة نمطية للبحث والتطابق في النصوص.", "real": "Regex مثل البحث في الهاتف: تكتب 'أح*' يلاقي أحمد، أحمد..."}, "explanation": {"simple": "Regex يسمح لك تبحث عن أنماط في النص: أرقام، إيميلات، تواريخ!", "normal": "Regular Expressions تُستخدم للبحث عن أنماط معينة (patterns) في النصوص، مثل extracting emails, IPs, passwords.", "technical": "Regex هي لغة formal لتحديد سلاسل البحث. تستخدم metacharacters مثل . * + ? ^ $ [] () {} | \\ للتطابق."}, "codeExample": "import re\\n\\ntext = 'Email: admin@omega.com, Key: XK-99-ALPHA'\\n\\n# استخراج الإيميل\\nemail = re.search(r'[\\w.-]+@[\\w.-]+', text)\\nprint(email.group())  # admin@omega.com\\n\\n# استخراج المفتاح\\nkey = re.search(r'XK-\\d+-\\w+', text)\\nprint(key.group())    # XK-99-ALPHA", "tips": "💡 \\d = رقم. \\w = حرف/رقم. . = أي حرف. * = صفر أو أكثر. + = واحد أو أكثر!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "import re", "type": "command", "explanation": "💡 نستورد مكتبة Regex"}, {"prompt": ">>>", "text": "text = 'Key: XK-99-ALPHA'", "type": "command", "explanation": "💡 النص المستهدف"}, {"prompt": ">>>", "text": "re.search(r'XK-\\d+-\\w+', text)", "type": "command", "explanation": "💡 نبحث عن النمط"}, {"text": "<re.Match object; span=(5, 16), match='XK-99-ALPHA'>", "type": "output", "explanation": "✅ لقينا المفتاح!"}, {"text": "XK-99-ALPHA", "type": "output", "explanation": "🎉 Regex يعمل!"}]});
+            lesson.addPractice({"task": "اكتب Regex يستخرج الإيميل من: 'Contact: hacker@cyber.com'", "prompt": "python>>> ", "hints": ["💡 import re", "💡 re.search(r'[\\w.-]+@[\\w.-]+', text)", "💡 .group() للحصول على النتيجة"]});
+            lesson.addChallenge([{"question": "ما هو Regex؟", "options": ["لعبة", "لغة أنماط للبحث في النصوص", "لغة برمجة", "ملف"], "correct": 1}, {"question": "ماذا يعني \\d في Regex؟", "options": ["حرف", "رقم", "مسافة", "نقطة"], "correct": 1}, {"question": "ما الفرق بين * و + في Regex؟", "options": ["لا فرق", "* = صفر أو أكثر، + = واحد أو أكثر", "* أسرع", "+ أصغر"], "correct": 1}, {"question": "لماذا Regex مهمة في الأمن السيبراني؟", "options": ["للتصميم", "لاستخراج البيانات الحساسة من السجلات", "للألعاب", "للحذف"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

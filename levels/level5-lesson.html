@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 5: Functions & Multi-Tool</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 5">LEVEL 5</h1>
+            <p class="cyber-subtitle">🔧 دوال Python المتقدمة</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">5</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 5
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "وجدت الباب الخلفي! لكنه محمي بـ 7 طبقات من التشفير!", "simple": "الباب محمي بـ 7 طبقات!", "delay": 1000}, {"avatar": "🔧", "speaker": "النظام", "text": "تحتاج لبناء أداة الاختراق المتعددة من الأجزاء التي جمعتها!", "simple": "لازم نبني أداة قوية!", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "🔧 المهمة: اكتب دوال Python متقدمة لتجميع الأداة النهائية!", "simple": "تعلم الدوال عشان تبني أداتك!", "delay": 1500}]);
+            lesson.addConcept({"title": "الدوال: أدواتك البرمجية", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:float 3s infinite;\">🔧</div><div style=\"margin-top:10px; color:var(--neon-green);\">Function = آلة جاهزة تستخدمها 100 مرة!</div></div><style>@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}</style>", "analogy": {"game": "Function مثل 'حركة خاصة' في اللعبة: تضغط زر واحد وتنفذ 10 حركات!", "tech": "الدالة هي كتلة كود قابلة لإعادة الاستخدام، تستقبل مدخلات وتُنتج مخرجات", "real": "Function مثل وصفة الطعام: تكتبها مرة وتطبخها 100 مرة!"}, "explanation": {"simple": "الدالة هي كود جاهز تعطيه شغلة وهو يرجعلك نتيجة!", "normal": "الدالة (Function) تُجمّع كوداً لمهمة محددة. تستدعيها بالاسم بدل إعادة الكتابة.", "technical": "Function هي كتلة من التعليمات البرمجية المُسمّاة، تستقبل parameters (arguments) وتُرجع return value."}, "codeExample": "def hack_password(password):\\n    if password == 'OMEGA':\\n        return '❌ ممنوع!'\\n    else:\\n        return '✅ تم الاختراق!'\\n\\nresult = hack_password('TEST')\\nprint(result)  # ✅ تم الاختراق!", "tips": "💡 def = define = عرّف دالة جديدة. return = أرجع النتيجة!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "def scan_port(port):", "type": "command", "explanation": "💡 نعرّف دالة لفحص المنفذ"}, {"text": "...    if port == 80:", "type": "output", "explanation": "✅ نتحقق إذا المنفذ 80"}, {"text": "...        return 'مفتوح'", "type": "output", "explanation": "✅ نرجع 'مفتوح'"}, {"prompt": ">>>", "text": "scan_port(80)", "type": "command", "explanation": "💡 نستدعي الدالة"}, {"text": "'مفتوح'", "type": "output", "explanation": "🎉 الدالة اشتغلت!"}]});
+            lesson.addPractice({"task": "اكتب دالة decrypt() تستقبل نص وتُرجعه مقلوباً (text[::-1])", "prompt": "python>>> ", "hints": ["💡 def decrypt(text):", "💡 return text[::-1]", "💡 decrypt('ABC') يجب أن يرجع 'CBA'"]});
+            lesson.addChallenge([{"question": "ما هو الغرض من الدوال؟", "options": ["تكرار الكود", "تنظيم وإعادة استخدام الكود", "حذف الملفات", "تبطيء البرنامج"], "correct": 1}, {"question": "كيف تُعرّف دالة في Python؟", "options": ["function name():", "def name():", "func name():", "define name():"], "correct": 1}, {"question": "ماذا تفعل return؟", "options": ["تتوقف البرنامج", "ترجع قيمة من الدالة", "تطبع نص", "تحذف متغير"], "correct": 1}, {"question": "لماذا الدوال مهمة في الأمن السيبراني؟", "options": ["للتصميم", "لإعادة استخدام أدوات الاختراق", "للألعاب", "للتلوين"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 4: Loops & Port Scanning</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 4">LEVEL 4</h1>
+            <p class="cyber-subtitle">🔍 فحص المنافذ بالحلقات</p>
+        </header>
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">4</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container"><div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div></div>
+        </div>
+        <div id="lesson-container" style="margin: 20px 0;"></div>
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+    <div id="agent-zero"><div class="agent-avatar" id="agent-avatar">🤖</div></div>
+    <script src="../js/cyber-engine.js"></script>
+    <script src="../js/lesson-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            const lesson = new LessonEngine.LessonBuilder('lesson-container', {
+                profile: 'teen', topic: 'python', level: 4
+            });
+            lesson.addStory([{"avatar": "🤖", "speaker": "Agent Zero", "text": "اجتزت الجدار الناري... لكن أمامك 65,535 منفذاً مغلقاً!", "simple": "في 65 ألف باب! لازم نفحصهم!", "delay": 1000}, {"avatar": "🚪", "speaker": "الشبكة", "text": "أحدها يحتوي على الباب الخلفي! لكن أي منها؟", "simple": "واحد منهم مفتوح! كيف نلقاه؟", "delay": 1500}, {"avatar": "🤖", "speaker": "Agent Zero", "text": "🔄 المهمة: استخدم For/While لفحص المنافذ وإيجاد الثغرة!", "simple": "تعلم الحلقات عشان تفحص كل الأبواب!", "delay": 1500}]);
+            lesson.addConcept({"title": "الحلقات: التكرار الذكي", "visualHTML": "<div style=\"text-align:center; padding:20px;\"><div style=\"font-size:4rem; animation:spin 3s linear infinite;\">🔄</div><div style=\"margin-top:10px; color:var(--neon-green);\">Loops = روبوت يكرر العملية 1000 مرة!</div></div><style>@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}</style>", "analogy": {"game": "Loops مثل لعبة 'كرر حركة الرقصة' 10 مرات بدل ما ترقص مرة!", "tech": "الحلقات تُنفّذ كوداً بشكل متكرر حتى يتحقق شرط معين", "real": "Loops مثل آلة غسيل الملابس: تكرر الغسل حتى تصبح نظيفة"}, "explanation": {"simple": "الحلقة تخلي الكمبيوتر يكرر شغلة كثير مرات بدون ما تتعب!", "normal": "الحلقات (Loops) تُنفّذ كتلة من الكود عدة مرات. For للعدد المعروف، While للشرط.", "technical": "For loop يتكرر على iterable (range, list, string). While loop يتكرر طالما condition == True."}, "codeExample": "# فحص المنافذ\\nfor port in range(1, 100):\\n    if port == 80:\\n        print(f'🚪 المنفذ {port} مفتوح!')\\n    else:\\n        print(f'🔒 المنفذ {port} مغلق')", "tips": "💡 range(1, 100) = من 1 إلى 99. range(5) = من 0 إلى 4!"});
+            lesson.addDemo({"steps": [{"prompt": ">>>", "text": "for i in range(5):", "type": "command", "explanation": "💡 نكرر 5 مرات"}, {"text": "...    print(f'فحص المنفذ {i}...')", "type": "output", "explanation": "✅ نطبع كل منفذ"}, {"text": "فحص المنفذ 0...\\nفحص المنفذ 1...\\nفحص المنفذ 2...", "type": "output", "explanation": "🔄 يتكرر تلقائياً!"}, {"prompt": ">>>", "text": "port = 31337", "type": "command", "explanation": "💡 المنفذ المفتوح هو 31337"}, {"prompt": ">>>", "text": "while port < 31340:", "type": "command", "explanation": "💡 نفحص 3 منافذ بـ While"}]});
+            lesson.addPractice({"task": "اكتب For loop تفحص المنافذ 1-10 وتطبع 'مفتوح' إذا كان 7", "prompt": "python>>> ", "hints": ["💡 for port in range(1, 11):", "💡 if port == 7:", "💡 print('مفتوح!')"]});
+            lesson.addChallenge([{"question": "ما الفرق بين For و While؟", "options": ["لا فرق", "For لعدد معروف، While لشرط", "For أبطأ", "While للأرقام فقط"], "correct": 1}, {"question": "ماذا تُنتج range(3)؟", "options": ["1,2,3", "0,1,2", "3,2,1", "0,1,2,3"], "correct": 1}, {"question": "كيف تكتب حلقة تتكرر 100 مرة؟", "options": ["for i in 100", "for i in range(100)", "repeat(100)", "loop 100"], "correct": 1}, {"question": "في فحص المنافذ، لماذا نستخدم الحلقات؟", "options": ["للتصميم", "لفحص آلاف المنافذ تلقائياً", "لطباعة صورة", "لحذف الملفات"], "correct": 1}]);
+            lesson.render();
+            setTimeout(() => CE.agentSpeak('correct', '👋 مرحباً Agent! ابدأ الدرس!'), 1000);
+        });
+    </script>
+</body>
+</html>
