@@ -265,6 +265,15 @@
         <div class="agent-avatar" id="agent-avatar">🤖</div>
     </div>
 
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-auth.js"></script>
+    <script src="js/firebase-db.js"></script>
+    <script src="js/firebase-leaderboard.js"></script>
     <script src="js/cyber-engine.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -340,6 +349,27 @@
 
             updateLevelMap();
             CE.updateHUD();
+        });
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize Firebase
+            if (window.FirebaseConfig) {
+                window.FirebaseConfig.init();
+                setTimeout(() => {
+                    window.FirebaseAuth.init();
+                    window.FirebaseAuth.updateAuthUI();
+                }, 1000);
+            }
+            
+            // Leaderboard button
+            const lbBtn = document.getElementById('leaderboard-button');
+            if (lbBtn) {
+                lbBtn.addEventListener('click', () => {
+                    if (window.LeaderboardUI) window.LeaderboardUI.show();
+                });
+            }
         });
     </script>
 </body>
