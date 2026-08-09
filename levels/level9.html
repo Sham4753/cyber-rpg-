@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 9: Regular Expressions</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .regex-cheat {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .regex-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .regex-card:hover {
+            background: rgba(0,212,255,0.1);
+            transform: translateY(-3px);
+        }
+        .regex-pattern {
+            font-family: var(--font-mono);
+            font-size: 1.3rem;
+            color: var(--neon-gold);
+            font-weight: bold;
+        }
+        .regex-desc {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+            margin-top: 5px;
+        }
+        .hawk-eye-game {
+            background: #0a0a0f;
+            border: 2px solid var(--neon-red);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .hawk-eye-game::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-red), var(--neon-orange));
+        }
+        .target-text {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            font-size: 0.9rem;
+            line-height: 2;
+            direction: ltr;
+            text-align: left;
+            color: #d4d4d4;
+            min-height: 150px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .target-text .highlight {
+            background: rgba(0, 255, 65, 0.3);
+            border: 1px solid var(--neon-green);
+            border-radius: 3px;
+            padding: 1px 3px;
+            animation: highlightPop 0.3s;
+        }
+        @keyframes highlightPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .regex-input-bar {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+            align-items: center;
+        }
+        .regex-input {
+            flex: 1;
+            background: #1e1e1e;
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-gold);
+            padding: 12px 15px;
+            font-family: var(--font-mono);
+            font-size: 1.1rem;
+            border-radius: 8px;
+            direction: ltr;
+            text-align: left;
+        }
+        .regex-input:focus {
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+        }
+        .match-counter {
+            text-align: center;
+            font-family: var(--font-mono);
+            font-size: 1.2rem;
+            color: var(--neon-green);
+            margin: 10px 0;
+        }
+        .python-playground {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--neon-blue);
+            direction: ltr;
+            text-align: left;
+        }
+        .code-input {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: var(--font-mono);
+            width: 100%;
+            border-radius: 4px;
+            margin: 5px 0;
+            direction: ltr;
+            text-align: left;
+        }
+        .code-output {
+            background: #0d0d0d;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            min-height: 50px;
+            direction: ltr;
+            text-align: left;
+        }
+        .mission-terminal {
+            background: #0a0a0f;
+            border: 1px solid var(--neon-red);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            direction: ltr;
+            text-align: left;
+            margin: 15px 0;
+        }
+        .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+        .track-step {
+            text-align: center;
+            opacity: 0.3;
+            transition: all 0.5s;
+        }
+        .track-step.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .track-step.completed {
+            opacity: 1;
+            color: var(--neon-green);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 9">LEVEL 9</h1>
+            <p class="cyber-subtitle">👁️ Regular Expressions — عين الصقر</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- PROGRESS TRACKER -->
+        <div class="progress-tracker" id="progress-tracker">
+            <div class="track-step active" data-step="1">
+                <div style="font-size: 1.5rem;">📚</div>
+                <div style="font-size: 0.7rem;">الدرس</div>
+            </div>
+            <div class="track-step" data-step="2">
+                <div style="font-size: 1.5rem;">👁️</div>
+                <div style="font-size: 0.7rem;">عين الصقر</div>
+            </div>
+            <div class="track-step" data-step="3">
+                <div style="font-size: 1.5rem;">🎯</div>
+                <div style="font-size: 0.7rem;">المهمة</div>
+            </div>
+            <div class="track-step" data-step="4">
+                <div style="font-size: 1.5rem;">🏆</div>
+                <div style="font-size: 0.7rem;">CTF</div>
+            </div>
+        </div>
+
+        <!-- LESSON: Regex -->
+        <div class="cyber-section fade-in-up" id="lesson-section">
+            <h2>📚 الدرس: Regular Expressions (النماذج المنتظمة)</h2>
+            <p>Regex هي <strong>عين الصقر</strong> في عالم الاختراق! تبحث عن أنماط في نصوص ضخمة بسرعة البرق!</p>
+
+            <div class="regex-cheat">
+                <div class="regex-card">
+                    <div class="regex-pattern">.</div>
+                    <div class="regex-desc">أي حرف واحد</div>
+                </div>
+                <div class="regex-card">
+                    <div class="regex-pattern">*</div>
+                    <div class="regex-desc">صفر أو أكثر</div>
+                </div>
+                <div class="regex-card">
+                    <div class="regex-pattern">+</div>
+                    <div class="regex-desc">واحد أو أكثر</div>
+                </div>
+                <div class="regex-card">
+                    <div class="regex-pattern">^</div>
+                    <div class="regex-desc">بداية السطر</div>
+                </div>
+                <div class="regex-card">
+                    <div class="regex-pattern">$</div>
+                    <div class="regex-desc">نهاية السطر</div>
+                </div>
+                <div class="regex-card">
+                    <div class="regex-pattern">\d</div>
+                    <div class="regex-desc">أي رقم</div>
+                </div>
+                <div class="regex-card">
+                    <div class="regex-pattern">\w</div>
+                    <div class="regex-desc">أي حرف/رقم</div>
+                </div>
+                <div class="regex-card">
+                    <div class="regex-pattern">[abc]</div>
+                    <div class="regex-desc">أي حرف من المجموعة</div>
+                </div>
+                <div class="regex-card">
+                    <div class="regex-pattern">{3}</div>
+                    <div class="regex-desc">تكرار 3 مرات</div>
+                </div>
+            </div>
+
+            <div class="python-playground" style="margin-top: 20px;">
+                <div style="color: #6a9955; margin-bottom: 10px;"># جرب Regex في Python:</div>
+                <input type="text" class="code-input" id="regex-demo-input" value="import re\ntext = 'IP: 192.168.1.1'\nmatch = re.search(r'\d+\.\d+\.\d+\.\d+', text)\nprint(match.group())" placeholder="import re...">
+                <button class="cyber-btn" id="run-regex-demo">▶️ تشغيل</button>
+                <div class="code-output" id="regex-demo-output">اضغط "تشغيل"...</div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="cyber-btn primary" id="next-game">ابدأ لعبة عين الصقر 👁️</button>
+            </div>
+        </div>
+
+        <!-- HAWK EYE GAME -->
+        <div class="cyber-section fade-in-up" id="game-section" style="display:none">
+            <h2>👁️ لعبة عين الصقر: ابحث عن الأهداف</h2>
+            <p>OMEGA خبّأ أسراره في نص ضخم! استخدم Regex لإيجادها!</p>
+
+            <div class="hawk-eye-game">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4 style="color: var(--neon-red);" id="game-round-title">الجولة 1: ابحث عن عناوين IP</h4>
+                    <span style="font-family: var(--font-mono); color: var(--neon-gold);" id="round-counter">1/3</span>
+                </div>
+
+                <div class="target-text" id="target-text"></div>
+
+                <div class="regex-input-bar">
+                    <span style="color: var(--neon-blue); font-family: var(--font-mono);">/</span>
+                    <input type="text" class="regex-input" id="regex-input" placeholder="اكتب النمط هنا... (مثال: \d+\.\d+\.\d+\.\d+)" value="">
+                    <span style="color: var(--neon-blue); font-family: var(--font-mono);">/g</span>
+                    <button class="cyber-btn primary" id="run-regex">🔍 بحث</button>
+                </div>
+
+                <div class="match-counter" id="match-counter">المطابقات: 0 / ?</div>
+
+                <div style="text-align: center; margin-top: 10px;">
+                    <button class="cyber-btn" id="hint-regex">💡 تلميح</button>
+                    <button class="cyber-btn" id="skip-regex" style="display:none;">⏭️ تخطي</button>
+                </div>
+            </div>
+
+            <div id="game-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">عين صقر حقيقية!</h3>
+                <button class="cyber-btn primary" id="next-mission">المهمة النهائية 🎯</button>
+            </div>
+        </div>
+
+        <!-- MISSION: Extract OMEGA Secrets -->
+        <div class="cyber-section fade-in-up" id="mission-section" style="display:none">
+            <h2>🎯 المهمة: استخراج أسرار OMEGA</h2>
+            <p>لقد حصلت على سجل ضخم من خادم OMEGA. استخرج منه: emails, IPs, passwords!</p>
+
+            <div class="mission-terminal">
+                <p style="color: var(--neon-red); margin-bottom: 10px;">📄 سجل OMEGA (مقتطف):</p>
+                <div style="color: #d4d4d4; font-size: 0.85rem; line-height: 1.8; white-space: pre-wrap;">User: admin@omega-corp.com | IP: 10.0.0.55 | Pass: Xk9#mK2$
+User: agent007@omega-corp.com | IP: 10.0.0.66 | Pass: Qw3#rT8!
+Server: backup.omega-corp.com | IP: 192.168.5.100
+Alert: breach@omega-corp.com | Time: 2026-08-08 03:47
+Master: omega@sector7.net | IP: 172.16.0.1 | Pass: OMEGA_999_XK</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p>اكتب Regex لاستخراج كل نوع من البيانات:</p>
+
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin-top: 10px;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: var(--neon-gold);">📧 1. استخرج Emails:</label>
+                        <input type="text" class="code-input" id="mission-email" placeholder="pattern for emails" value="">
+                        <button class="cyber-btn" id="check-email">✓ تحقق</button>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: var(--neon-blue);">🌐 2. استخرج IPs:</label>
+                        <input type="text" class="code-input" id="mission-ip" placeholder="pattern for IPs" value="">
+                        <button class="cyber-btn" id="check-ip">✓ تحقق</button>
+                    </div>
+                    <div>
+                        <label style="color: var(--neon-red);">🔑 3. استخرج Passwords:</label>
+                        <input type="text" class="code-input" id="mission-pass" placeholder="pattern for passwords" value="">
+                        <button class="cyber-btn" id="check-pass">✓ تحقق</button>
+                    </div>
+                </div>
+
+                <div class="code-output" id="mission-output" style="margin-top: 15px;"></div>
+            </div>
+
+            <div id="mission-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+                <h3 style="color: var(--neon-red);">أسرار OMEGA مكشوفة!</h3>
+                <p style="color: var(--neon-gold); font-family: var(--font-mono); margin-top: 10px;">omega@sector7.net | OMEGA_999_XK</p>
+                <button class="cyber-btn primary" id="go-to-ctf">التحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي Regex المتقدم</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك! اجتزت المستوى 9!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 9, () => {
+                CE.agentSpeak('correct', '👁️ Regex هي عين الصقر! تبحث عن الأنماط بسرعة!');
+            });
+
+            // Progress tracker
+            function setProgress(step) {
+                document.querySelectorAll('.track-step').forEach(s => {
+                    const sp = parseInt(s.dataset.step);
+                    s.classList.remove('active', 'completed');
+                    if (sp < step) s.classList.add('completed');
+                    else if (sp === step) s.classList.add('active');
+                });
+            }
+
+            // ========== LESSON DEMO ==========
+            document.getElementById('run-regex-demo').addEventListener('click', () => {
+                const code = document.getElementById('regex-demo-input').value;
+                const output = document.getElementById('regex-demo-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+                    eval(code);
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">✅ ${result}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct', '🔥 re.search() يجد أول تطابق!');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('next-game').addEventListener('click', () => {
+                document.getElementById('lesson-section').style.display = 'none';
+                document.getElementById('game-section').style.display = 'block';
+                document.getElementById('game-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(2);
+                initHawkEye();
+                CE.audio.click();
+            });
+
+            // ========== HAWK EYE GAME ==========
+            const rounds = [
+                {
+                    title: 'الجولة 1: ابحث عن عناوين IP',
+                    text: `Server logs:\n192.168.1.100 - CONNECTED\n10.0.0.55 - FAILED\n172.16.0.1 - ADMIN\n192.168.5.200 - GUEST\n10.0.0.1 - ROOT`,
+                    pattern: /\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g,
+                    hint: 'استخدم \\d+\\.\\d+\\.\\d+\\.\\d+',
+                    targetCount: 5
+                },
+                {
+                    title: 'الجولة 2: ابحث عن كلمات المرور',
+                    text: `Credentials:\nUser: admin Pass: Secr3t!\nUser: root Pass: P@ssw0rd\nUser: guest Pass: 123456\nUser: omega Pass: Xk9#mK2$`,
+                    pattern: /Pass:\s*(\S+)/g,
+                    hint: 'استخدم Pass:\\s*\\S+',
+                    targetCount: 4
+                },
+                {
+                    title: 'الجولة 3: ابحث عن أرقام بطاقات',
+                    text: `Transactions:\nCard: 4532-1234-5678-9012\nCard: 5500-0000-0000-0004\nCard: 4111-1111-1111-1111\nCard: 3400-0000-0000-009`,
+                    pattern: /\d{4}-\d{4}-\d{4}-\d{4}/g,
+                    hint: 'استخدم \\d{4}-\\d{4}-\\d{4}-\\d{4}',
+                    targetCount: 4
+                }
+            ];
+
+            let currentRound = 0;
+            let gameComplete = false;
+
+            function initHawkEye() {
+                currentRound = 0;
+                gameComplete = false;
+                document.getElementById('game-complete').style.display = 'none';
+                loadRound();
+            }
+
+            function loadRound() {
+                if (currentRound >= rounds.length) {
+                    gameComplete = true;
+                    document.getElementById('game-complete').style.display = 'block';
+                    CE.audio.levelUp();
+                    CE.agentSpeak('correct', '👁️ رؤية حادة! وجدت كل الأنماط!');
+                    CE.addXP(100, 'Hawk Eye Master');
+                    return;
+                }
+
+                const r = rounds[currentRound];
+                document.getElementById('game-round-title').textContent = r.title;
+                document.getElementById('round-counter').textContent = (currentRound + 1) + '/' + rounds.length;
+                document.getElementById('target-text').innerHTML = escapeHtml(r.text);
+                document.getElementById('regex-input').value = '';
+                document.getElementById('match-counter').textContent = 'المطابقات: 0 / ' + r.targetCount;
+                document.getElementById('match-counter').style.color = 'var(--neon-green)';
+            }
+
+            function escapeHtml(text) {
+                return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
+
+            document.getElementById('run-regex').addEventListener('click', () => {
+                if (gameComplete) return;
+
+                const input = document.getElementById('regex-input').value.trim();
+                const r = rounds[currentRound];
+                const textEl = document.getElementById('target-text');
+                const counterEl = document.getElementById('match-counter');
+
+                try {
+                    const regex = new RegExp(input, 'g');
+                    const matches = r.text.match(regex) || [];
+
+                    // Highlight matches
+                    let highlighted = escapeHtml(r.text);
+                    const uniqueMatches = [...new Set(matches)];
+                    uniqueMatches.forEach(match => {
+                        const escaped = escapeHtml(match);
+                        highlighted = highlighted.replaceAll(escaped, `<span class="highlight">${escaped}</span>`);
+                    });
+                    textEl.innerHTML = highlighted;
+
+                    counterEl.textContent = `المطابقات: ${matches.length} / ${r.targetCount}`;
+
+                    if (matches.length >= r.targetCount) {
+                        CE.audio.success();
+                        CE.agentSpeak('correct', `🎯 جولة ${currentRound + 1} مكتملة!`);
+                        currentRound++;
+                        setTimeout(loadRound, 1500);
+                    } else {
+                        CE.audio.click();
+                    }
+                } catch(e) {
+                    counterEl.textContent = '❌ نمط خاطئ: ' + e.message;
+                    counterEl.style.color = 'var(--neon-red)';
+                    CE.audio.fail();
+                }
+            });
+
+            document.getElementById('hint-regex').addEventListener('click', () => {
+                const r = rounds[currentRound];
+                CE.showSmartHint(r.hint, 'regex-input');
+            });
+
+            document.getElementById('next-mission').addEventListener('click', () => {
+                document.getElementById('game-section').style.display = 'none';
+                document.getElementById('mission-section').style.display = 'block';
+                document.getElementById('mission-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(3);
+                CE.audio.click();
+            });
+
+            // ========== MISSION ==========
+            const missionLog = `User: admin@omega-corp.com | IP: 10.0.0.55 | Pass: Xk9#mK2$
+User: agent007@omega-corp.com | IP: 10.0.0.66 | Pass: Qw3#rT8!
+Server: backup.omega-corp.com | IP: 192.168.5.100
+Alert: breach@omega-corp.com | Time: 2026-08-08 03:47
+Master: omega@sector7.net | IP: 172.16.0.1 | Pass: OMEGA_999_XK`;
+
+            let emailDone = false, ipDone = false, passDone = false;
+
+            function checkMission(pattern, type, btnId) {
+                const btn = document.getElementById(btnId);
+                btn.addEventListener('click', () => {
+                    const input = document.getElementById('mission-' + type).value.trim();
+                    const output = document.getElementById('mission-output');
+
+                    try {
+                        const regex = new RegExp(input, 'g');
+                        const matches = missionLog.match(regex) || [];
+
+                        if (type === 'email' && matches.length >= 4) {
+                            emailDone = true;
+                            output.innerHTML += `<div style="color: #00ff41;">✅ Emails: ${matches.join(', ')}</div>`;
+                        } else if (type === 'ip' && matches.length >= 4) {
+                            ipDone = true;
+                            output.innerHTML += `<div style="color: #00ff41;">✅ IPs: ${matches.join(', ')}</div>`;
+                        } else if (type === 'pass' && matches.length >= 3) {
+                            passDone = true;
+                            output.innerHTML += `<div style="color: #00ff41;">✅ Passwords: ${matches.join(', ')}</div>`;
+                        } else {
+                            output.innerHTML += `<div style="color: #ff3333;">❌ لم يُعثر على ما يكفي (وجد ${matches.length})</div>`;
+                            CE.audio.fail();
+                            CE.agentSpeak('hint', '💡 جرب نمطاً أوسع!');
+                            CE.state.currentSession.mistakes++;
+                            return;
+                        }
+
+                        CE.audio.success();
+                        btn.disabled = true;
+                        btn.textContent = '✅ تم';
+
+                        if (emailDone && ipDone && passDone) {
+                            document.getElementById('mission-complete').style.display = 'block';
+                            CE.audio.hack();
+                            CE.agentSpeak('correct', '🔥 كل أسرار OMEGA مكشوفة!');
+                            CE.addXP(100, 'Secrets Extracted');
+                        }
+                    } catch(e) {
+                        output.innerHTML += `<div style="color: #ff3333;">❌ خطأ: ${e.message}</div>`;
+                        CE.audio.fail();
+                    }
+                });
+            }
+
+            checkMission(/[\w.-]+@[\w.-]+\.\w+/g, 'email', 'check-email');
+            checkMission(/\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}/g, 'ip', 'check-ip');
+            checkMission(/Pass:\s*(\S+)/g, 'pass', 'check-pass');
+
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('mission-section').style.display = 'none';
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(4);
+                initQuiz();
+                CE.audio.click();
+            });
+
+            // ========== CTF ==========
+            const questions = [
+                { q: 'ما الذي يطابق \\d في Regex؟', options: ['أي حرف', 'أي رقم', 'أي مسافة', 'أي رمز'], correct: 1 },
+                { q: 'ما الفرق بين * و +؟', options: ['لا فرق', '* = صفر أو أكثر, + = واحد أو أكثر', '* = واحد أو أكثر, + = صفر أو أكثر', '* = نهاية السطر'], correct: 1 },
+                { q: 'كيف تبحث عن بداية السطر؟', options: ['$', '^', '\\b', '\\n'], correct: 1 },
+                { q: '[abc] يطابق:', options: ['السلسلة "abc"', 'أي حرف من a أو b أو c', 'حرف a فقط', 'لا شيء'], correct: 1 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() { currentQ = 0; score = 0; showQuestion(); }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(9, 150 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 9, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: \\d = رقم, \\w = حرف/رقم, . = أي حرف, + = واحد أو أكثر!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 11: Web Scraping</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .webpage-sim {
+            background: #ffffff;
+            border: 3px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 0;
+            margin: 20px 0;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+            color: #333;
+            direction: ltr;
+            text-align: left;
+        }
+        .webpage-header {
+            background: #1a1a2e;
+            color: white;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .webpage-nav {
+            background: #16213e;
+            padding: 10px 20px;
+            display: flex;
+            gap: 20px;
+        }
+        .webpage-nav a {
+            color: #00d4ff;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .webpage-content {
+            padding: 20px;
+        }
+        .webpage-article {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+        .webpage-article h3 {
+            color: #1a1a2e;
+            margin-bottom: 8px;
+        }
+        .webpage-article p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 0.9rem;
+        }
+        .webpage-secret {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            color: #856404;
+        }
+        .webpage-footer {
+            background: #f8f9fa;
+            padding: 15px 20px;
+            border-top: 1px solid #ddd;
+            font-size: 0.8rem;
+            color: #666;
+        }
+        .scrape-target {
+            border: 2px dashed var(--neon-red);
+            position: relative;
+        }
+        .scrape-target::after {
+            content: 'TARGET';
+            position: absolute;
+            top: -10px;
+            right: 10px;
+            background: var(--neon-red);
+            color: white;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            border-radius: 4px;
+            font-family: var(--font-mono);
+        }
+        .scraper-tool {
+            background: #0a0a0f;
+            border: 1px solid var(--neon-green);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            font-family: var(--font-mono);
+            direction: ltr;
+            text-align: left;
+        }
+        .scrape-result {
+            background: #1e1e1e;
+            border: 1px solid var(--neon-gold);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            direction: ltr;
+            text-align: left;
+            min-height: 60px;
+            color: #d4d4d4;
+        }
+        .tag-highlight {
+            color: var(--neon-blue);
+        }
+        .attr-highlight {
+            color: var(--neon-gold);
+        }
+        .text-highlight {
+            color: var(--neon-green);
+        }
+        .python-playground {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--neon-blue);
+            direction: ltr;
+            text-align: left;
+        }
+        .code-input {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: var(--font-mono);
+            width: 100%;
+            border-radius: 4px;
+            margin: 5px 0;
+            direction: ltr;
+            text-align: left;
+        }
+        .code-output {
+            background: #0d0d0d;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            min-height: 50px;
+            direction: ltr;
+            text-align: left;
+        }
+        .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+        .track-step {
+            text-align: center;
+            opacity: 0.3;
+            transition: all 0.5s;
+        }
+        .track-step.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .track-step.completed {
+            opacity: 1;
+            color: var(--neon-green);
+        }
+        .data-extraction {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+        .data-card {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--neon-blue);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .data-card.found {
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 65, 0.1);
+            animation: dataFound 0.5s;
+        }
+        @keyframes dataFound {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .data-card .data-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+        .data-card .data-label {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.7);
+        }
+        .data-card .data-value {
+            font-family: var(--font-mono);
+            color: var(--neon-gold);
+            margin-top: 5px;
+            min-height: 20px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 11">LEVEL 11</h1>
+            <p class="cyber-subtitle">🕷️ Web Scraping — جمع المعلومات</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- PROGRESS TRACKER -->
+        <div class="progress-tracker" id="progress-tracker">
+            <div class="track-step active" data-step="1">
+                <div style="font-size: 1.5rem;">📚</div>
+                <div style="font-size: 0.7rem;">الدرس</div>
+            </div>
+            <div class="track-step" data-step="2">
+                <div style="font-size: 1.5rem;">🕷️</div>
+                <div style="font-size: 0.7rem;">العنكبوت</div>
+            </div>
+            <div class="track-step" data-step="3">
+                <div style="font-size: 1.5rem;">🎯</div>
+                <div style="font-size: 0.7rem;">المهمة</div>
+            </div>
+            <div class="track-step" data-step="4">
+                <div style="font-size: 1.5rem;">🏆</div>
+                <div style="font-size: 0.7rem;">CTF</div>
+            </div>
+        </div>
+
+        <!-- LESSON: Web Scraping -->
+        <div class="cyber-section fade-in-up" id="lesson-section">
+            <h2>📚 الدرس: Web Scraping (استخراج بيانات المواقع)</h2>
+            <p><strong>Web Scraping</strong> هو فن استخراج البيانات من صفحات الويب! نستخدم Python لـ "قراءة" HTML واستخراج ما نريد.</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 15px; border: 1px solid var(--neon-green); direction: ltr; text-align: left;">
+                    <h4 style="color: var(--neon-green); margin-bottom: 8px;">🌐 جلب الصفحة</h4>
+                    <pre style="font-family: var(--font-mono); color: #d4d4d4; font-size: 0.85rem; line-height: 1.6;">import requests
+from bs4 import BeautifulSoup
+
+url = "https://omega.com"
+response = requests.get(url)
+soup = BeautifulSoup(
+    response.text,
+    'html.parser'
+)</pre>
+                </div>
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 15px; border: 1px solid var(--neon-blue); direction: ltr; text-align: left;">
+                    <h4 style="color: var(--neon-blue); margin-bottom: 8px;">🔍 البحث في HTML</h4>
+                    <pre style="font-family: var(--font-mono); color: #d4d4d4; font-size: 0.85rem; line-height: 1.6;"># البحث باسم الوسم
+titles = soup.find_all('h1')
+
+# البحث بـ class
+secrets = soup.find_all(
+    'div',
+    class_='secret'
+)
+
+# استخراج النص
+for item in secrets:
+    print(item.text)</pre>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <p><strong>🔧 أوامر BeautifulSoup المهمة:</strong></p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-green);">find()</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">أول تطابق</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-blue);">find_all()</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">كل التطابقات</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-gold);">.text</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">استخراج النص</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-pink);">['href']</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">استخراج رابط</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="python-playground" style="margin-top: 20px;">
+                <div style="color: #6a9955; margin-bottom: 10px;"># جرب استخراج بيانات:</div>
+                <textarea class="code-input" id="scrape-demo-input" rows="4">html = '<div class="secret">KEY: XK-99</div>'
+# استخدم find() للبحث عن div بالclass "secret"
+# ثم اطبع .text</textarea>
+                <button class="cyber-btn" id="run-scrape-demo">▶️ تشغيل</button>
+                <div class="code-output" id="scrape-demo-output">اضغط "تشغيل"...</div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="cyber-btn primary" id="next-spider">ابدأ العنكبوت 🕷️</button>
+            </div>
+        </div>
+
+        <!-- SPIDER GAME: Scrape the Fake Webpage -->
+        <div class="cyber-section fade-in-up" id="spider-section" style="display:none">
+            <h2>🕷️ العنكبوت: استخرج البيانات من موقع OMEGA</h2>
+            <p>هذا موقع وهمي لـ OMEGA_CORP. استخدم أدوات Scraping لاستخراج البيانات المخفية!</p>
+
+            <div class="webpage-sim" id="fake-webpage">
+                <div class="webpage-header">OMEGA_CORP - Official Portal</div>
+                <div class="webpage-nav">
+                    <a href="#">Home</a>
+                    <a href="#">About</a>
+                    <a href="#">Services</a>
+                    <a href="#">Contact</a>
+                </div>
+                <div class="webpage-content">
+                    <div class="webpage-article">
+                        <h3>Welcome to OMEGA_CORP</h3>
+                        <p>Leading innovation in cyber security solutions. Our mission is to protect the digital world.</p>
+                        <div class="webpage-secret">CEO: Alexander OMEGA | ID: DIR-001</div>
+                    </div>
+                    <div class="webpage-article scrape-target">
+                        <h3>Latest Projects</h3>
+                        <p>Project ALPHA: Status <strong>ACTIVE</strong></p>
+                        <p>Project BETA: Status <strong>COMPLETED</strong></p>
+                        <div class="webpage-secret">SECRET_KEY: OMEGA-PHASE-2-INIT</div>
+                    </div>
+                    <div class="webpage-article">
+                        <h3>Contact Information</h3>
+                        <p>Email: contact@omega-corp.com</p>
+                        <p>Phone: +1-555-OMEGA</p>
+                        <div class="webpage-secret">BACKDOOR: /admin/backup.zip</div>
+                    </div>
+                </div>
+                <div class="webpage-footer">
+                    &copy; 2026 OMEGA_CORP. All rights reserved. | <span style="color: #999;">Server: Sector_7_Node_3</span>
+                </div>
+            </div>
+
+            <div class="scraper-tool">
+                <h4 style="color: var(--neon-green); margin-bottom: 10px;">🔧 أداة Scraping:</h4>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.85rem; margin-bottom: 10px;">اكتب نمط CSS selector لاستخراج البيانات:</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" class="code-input" id="css-selector" placeholder="مثال: .secret أو h3 أو .webpage-secret" value="">
+                    <button class="cyber-btn primary" id="run-scrape">🔍 استخرج</button>
+                </div>
+                <div class="scrape-result" id="scrape-result">النتيجة ستظهر هنا...</div>
+            </div>
+
+            <div class="data-extraction" id="data-extraction">
+                <div class="data-card" data-target="ceo">
+                    <div class="data-icon">👤</div>
+                    <div class="data-label">المدير التنفيذي</div>
+                    <div class="data-value" id="data-ceo">???</div>
+                </div>
+                <div class="data-card" data-target="key">
+                    <div class="data-icon">🔑</div>
+                    <div class="data-label">المفتاح السري</div>
+                    <div class="data-value" id="data-key">???</div>
+                </div>
+                <div class="data-card" data-target="backdoor">
+                    <div class="data-icon">🚪</div>
+                    <div class="data-label">الباب الخلفي</div>
+                    <div class="data-value" id="data-backdoor">???</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="cyber-btn" id="hint-spider">💡 تلميح</button>
+            </div>
+
+            <div id="spider-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">استخرجت كل البيانات!</h3>
+                <button class="cyber-btn primary" id="next-mission">المهمة النهائية 🎯</button>
+            </div>
+        </div>
+
+        <!-- MISSION: Advanced Scraping -->
+        <div class="cyber-section fade-in-up" id="mission-section" style="display:none">
+            <h2>🎯 المهمة: استخراج جدول العملاء السري</h2>
+            <p>لقد وجدت جدولاً HTML يحتوي على بيانات عملاء OMEGA. استخرج الأسماء والمستويات!</p>
+
+            <div style="background: #ffffff; border: 2px solid var(--neon-red); border-radius: 8px; padding: 20px; margin: 15px 0; direction: ltr; text-align: left; overflow-x: auto;">
+                <table style="width: 100%; border-collapse: collapse; font-family: Arial, sans-serif; color: #333;">
+                    <thead>
+                        <tr style="background: #1a1a2e; color: white;">
+                            <th style="padding: 10px; border: 1px solid #ddd;">ID</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Name</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Level</th>
+                            <th style="padding: 10px; border: 1px solid #ddd;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">001</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">OMEGA</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">999</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">ACTIVE</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">002</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Alpha</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">50</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">ACTIVE</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">003</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Beta</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">75</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">SUSPENDED</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 10px; border: 1px solid #ddd;">004</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">Gamma</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">99</td>
+                            <td style="padding: 10px; border: 1px solid #ddd;">ACTIVE</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p>اكتب كود Python لاستخراج الأسماء من الجدول:</p>
+
+                <div class="python-playground">
+                    <div style="color: #6a9955; margin-bottom: 10px;"># استخدم find_all('tr') ثم استخرج الأسماء:</div>
+                    <textarea class="code-input" id="mission-code" rows="5" style="resize: vertical;"># html يحتوي على جدول بالأعلى
+# استخرج الأسماء من العمود الثاني
+names = []
+# اكتب الكود هنا...
+print(names)</textarea>
+                    <button class="cyber-btn primary" id="run-mission">🚀 تشغيل الكود</button>
+                    <div class="code-output" id="mission-output"></div>
+                </div>
+            </div>
+
+            <div id="mission-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+                <h3 style="color: var(--neon-red);">قائمة عملاء OMEGA مكشوفة!</h3>
+                <p style="color: var(--neon-gold); font-family: var(--font-mono); margin-top: 10px;">OMEGA(999) | Alpha(50) | Beta(75) | Gamma(99)</p>
+                <button class="cyber-btn primary" id="go-to-ctf">التحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي Web Scraping المتقدم</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك! اجتزت المستوى 11!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 11, () => {
+                CE.agentSpeak('correct', '🕷️ Web Scraping يجعلك ترى ما لا يراه الآخرون!');
+            });
+
+            // Progress tracker
+            function setProgress(step) {
+                document.querySelectorAll('.track-step').forEach(s => {
+                    const sp = parseInt(s.dataset.step);
+                    s.classList.remove('active', 'completed');
+                    if (sp < step) s.classList.add('completed');
+                    else if (sp === step) s.classList.add('active');
+                });
+            }
+
+            // ========== LESSON DEMO ==========
+            document.getElementById('run-scrape-demo').addEventListener('click', () => {
+                const code = document.getElementById('scrape-demo-input').value;
+                const output = document.getElementById('scrape-demo-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+
+                    // Simulate BeautifulSoup-like behavior
+                    if (code.includes('find') && code.includes('secret')) {
+                        console.log('KEY: XK-99');
+                    } else {
+                        eval(code);
+                    }
+
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">✅ ${result || 'Done!'}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct', '🔥 find() يبحث عن أول تطابق, find_all() يبحث عن الكل!');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('next-spider').addEventListener('click', () => {
+                document.getElementById('lesson-section').style.display = 'none';
+                document.getElementById('spider-section').style.display = 'block';
+                document.getElementById('spider-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(2);
+                CE.audio.click();
+            });
+
+            // ========== SPIDER GAME ==========
+            const secrets = {
+                ceo: { selector: '.webpage-secret', index: 0, value: 'CEO: Alexander OMEGA', extract: 'Alexander OMEGA' },
+                key: { selector: '.webpage-secret', index: 1, value: 'SECRET_KEY: OMEGA-PHASE-2-INIT', extract: 'OMEGA-PHASE-2-INIT' },
+                backdoor: { selector: '.webpage-secret', index: 2, value: 'BACKDOOR: /admin/backup.zip', extract: '/admin/backup.zip' }
+            };
+
+            let foundData = { ceo: false, key: false, backdoor: false };
+
+            document.getElementById('run-scrape').addEventListener('click', () => {
+                const selector = document.getElementById('css-selector').value.trim();
+                const resultEl = document.getElementById('scrape-result');
+
+                if (!selector) {
+                    resultEl.innerHTML = '<span style="color: #ff3333;">❌ اكتب selector أولاً!</span>';
+                    CE.audio.fail();
+                    return;
+                }
+
+                // Simulate scraping
+                let found = [];
+
+                if (selector === '.secret' || selector === '.webpage-secret') {
+                    found = [
+                        'CEO: Alexander OMEGA | ID: DIR-001',
+                        'SECRET_KEY: OMEGA-PHASE-2-INIT',
+                        'BACKDOOR: /admin/backup.zip'
+                    ];
+
+                    // Mark all as found
+                    Object.keys(foundData).forEach(key => {
+                        if (!foundData[key]) {
+                            foundData[key] = true;
+                            const card = document.querySelector(`[data-target="${key}"]`);
+                            card.classList.add('found');
+                            document.getElementById(`data-${key}`).textContent = secrets[key].extract;
+                        }
+                    });
+
+                    resultEl.innerHTML = found.map(f => `<div style="color: #00ff41; margin: 3px 0;">✓ ${f}</div>`).join('');
+                    CE.audio.hack();
+                    CE.agentSpeak('correct', '🔥 وجدت كل الأسرار!');
+                } else if (selector === 'h3') {
+                    found = ['Welcome to OMEGA_CORP', 'Latest Projects', 'Contact Information'];
+                    resultEl.innerHTML = found.map(f => `<div style="color: #00d4ff; margin: 3px 0;">• ${f}</div>`).join('');
+                    CE.audio.click();
+                    CE.agentSpeak('hint', '💡 جيد! لكن ابحث عن .webpage-secret للأسرار!');
+                } else if (selector === 'p' || selector === 'strong') {
+                    found = ['Project ALPHA: ACTIVE', 'Project BETA: COMPLETED'];
+                    resultEl.innerHTML = found.map(f => `<div style="color: #00d4ff; margin: 3px 0;">• ${f}</div>`).join('');
+                    CE.audio.click();
+                } else {
+                    resultEl.innerHTML = '<span style="color: #ff3333;">❌ لم يُعثر على شيء بهذا الselector. جرب .webpage-secret</span>';
+                    CE.audio.fail();
+                    CE.state.currentSession.mistakes++;
+                }
+
+                // Check completion
+                if (foundData.ceo && foundData.key && foundData.backdoor) {
+                    document.getElementById('spider-complete').style.display = 'block';
+                    CE.addXP(100, 'All Data Scraped');
+                }
+            });
+
+            document.getElementById('hint-spider').addEventListener('click', () => {
+                CE.showSmartHint('جرب كتابة: .webpage-secret', 'css-selector');
+            });
+
+            document.getElementById('next-mission').addEventListener('click', () => {
+                document.getElementById('spider-section').style.display = 'none';
+                document.getElementById('mission-section').style.display = 'block';
+                document.getElementById('mission-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(3);
+                CE.audio.click();
+            });
+
+            // ========== MISSION ==========
+            document.getElementById('run-mission').addEventListener('click', () => {
+                const code = document.getElementById('mission-code').value;
+                const output = document.getElementById('mission-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+
+                    // Check if code looks correct
+                    const hasTr = code.includes('tr');
+                    const hasTd = code.includes('td');
+                    const hasAppend = code.includes('append') || code.includes('names');
+
+                    if (hasTr && hasTd) {
+                        // Simulate the result
+                        console.log("['OMEGA', 'Alpha', 'Beta', 'Gamma']");
+                        console.log = origLog;
+                        output.innerHTML = `<span style="color: #00ff41;">📤 ${result}</span>`;
+
+                        document.getElementById('mission-complete').style.display = 'block';
+                        CE.audio.hack();
+                        CE.agentSpeak('correct', '🔥 استخرجت كل الأسماء من الجدول!');
+                        CE.addXP(100, 'Table Scraped');
+                    } else {
+                        console.log = origLog;
+                        output.innerHTML = `<span style="color: #ff3333;">❌ يجب أن تبحث عن 'tr' و 'td' في الجدول!</span>`;
+                        CE.audio.fail();
+                        CE.agentSpeak('hint', '💡 استخدم find_all("tr") ثم اذهب لكل صف واستخرج العمود الثاني!');
+                        CE.state.currentSession.mistakes++;
+                    }
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('mission-section').style.display = 'none';
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(4);
+                initQuiz();
+                CE.audio.click();
+            });
+
+            // ========== CTF ==========
+            const questions = [
+                { q: 'ما هي مكتبة Python الشهيرة لـ Web Scraping؟', options: ['Requests', 'BeautifulSoup', 'JSON', 'Regex'], correct: 1 },
+                { q: 'ما الفرق بين find() و find_all()؟', options: ['لا فرق', 'find = أول تطابق, find_all = كل التطابقات', 'find = كل, find_all = أول', 'find تحذف'], correct: 1 },
+                { q: 'كيف تستخرج النص من عنصر HTML؟', options: ['.html', '.text', '.content', '.value'], correct: 1 },
+                { q: 'أي selector يختار العناصر بالclass "secret"؟', options: ['#secret', '.secret', 'secret', '*secret'], correct: 1 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() { currentQ = 0; score = 0; showQuestion(); }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(11, 150 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 11, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: BeautifulSoup + find_all() + .text = Scraping!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

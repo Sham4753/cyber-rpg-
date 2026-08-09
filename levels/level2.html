@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 2: Python & Caesar Cipher</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .cipher-wheel {
+            width: 250px;
+            height: 250px;
+            margin: 20px auto;
+            position: relative;
+            border-radius: 50%;
+            border: 3px solid var(--neon-green);
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+        }
+        .cipher-wheel-inner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            border: 2px solid var(--neon-blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: rgba(0,0,0,0.5);
+        }
+        .cipher-letter {
+            position: absolute;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .python-playground {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--neon-blue);
+        }
+        .code-input {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: var(--font-mono);
+            width: 100%;
+            border-radius: 4px;
+            margin: 5px 0;
+            direction: ltr;
+            text-align: left;
+        }
+        .code-output {
+            background: #0d0d0d;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            min-height: 50px;
+            direction: ltr;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 2">LEVEL 2</h1>
+            <p class="cyber-subtitle">📊 Python Variables + Caesar Cipher</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- LESSON: Variables -->
+        <div class="cyber-section fade-in-up">
+            <h2>📚 الدرس: المتغيرات في Python</h2>
+            <p>المتغيرات هي <strong>صناديق</strong> نخزن فيها البيانات. في Python، ننشئها ببساطة:</p>
+
+            <div class="python-playground">
+                <div style="color: #6a9955; margin-bottom: 10px;"># جرب الكود هنا:</div>
+                <input type="text" class="code-input" id="var-input" placeholder="name = 'Agent'" value="name = 'Agent'">
+                <input type="text" class="code-input" id="var-input2" placeholder="age = 25" value="age = 25">
+                <button class="cyber-btn" id="run-var">▶️ تشغيل</button>
+                <div class="code-output" id="var-output">اضغط "تشغيل" لرؤية النتيجة...</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p><strong>🔢 أنواع البيانات:</strong></p>
+                <ul style="padding-right: 20px; line-height: 2; margin-top: 10px;">
+                    <li><code>str</code> - نص (مثل <code>"Hello"</code>)</li>
+                    <li><code>int</code> - رقم صحيح (مثل <code>42</code>)</li>
+                    <li><code>float</code> - رقم عشري (مثل <code>3.14</code>)</li>
+                    <li><code>bool</code> - صح/خطأ (مثل <code>True</code> أو <code>False</code>)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- CAESAR CIPHER -->
+        <div class="cyber-section fade-in-up">
+            <h2>🔮 عجلة تشفير قيصر</h2>
+            <p>تشفير قيصر: نزيح كل حرف بعدد معين من المراكز. مثال: A + 3 = D</p>
+
+            <div class="cipher-wheel" id="cipher-wheel">
+                <div class="cipher-wheel-inner" id="wheel-center">A → D</div>
+            </div>
+
+            <div style="text-align: center; margin: 15px 0;">
+                <label style="color: var(--neon-blue);">مقدار الإزاحة (Shift): </label>
+                <input type="range" id="shift-slider" min="1" max="25" value="3" style="width: 200px; vertical-align: middle;">
+                <span id="shift-value" style="font-family: var(--font-mono); font-size: 1.5rem; color: var(--neon-gold);">3</span>
+            </div>
+
+            <div class="python-playground">
+                <div style="color: #6a9955; margin-bottom: 10px;"># فك التشفير:</div>
+                <input type="text" class="code-input" id="cipher-input" placeholder="أدخل النص المشفر" value="Khoor Zruog" dir="rtl">
+                <button class="cyber-btn" id="run-cipher">🔓 فك التشفير</button>
+                <div class="code-output" id="cipher-output">النتيجة ستظهر هنا...</div>
+            </div>
+        </div>
+
+        <!-- MISSION -->
+        <div class="cyber-section fade-in-up">
+            <h2>🎯 المهمة: فك شفرة PHANTOM</h2>
+            <p>لقد اعترضنا رسالة مشفرة من PHANTOM. نعلم أنه يستخدم إزاحة = <strong>5</strong>.</p>
+            <div style="background: rgba(255,0,0,0.1); border: 1px solid var(--neon-red); padding: 20px; border-radius: 8px; margin: 15px 0; text-align: center;">
+                <p style="font-family: var(--font-mono); font-size: 1.3rem; color: var(--neon-red); direction: ltr;">Mjqqt Btwqi!</p>
+                <p style="margin-top: 10px; color: rgba(255,255,255,0.7);">اكتب كود Python لفك هذا التشفير</p>
+            </div>
+
+            <div class="python-playground">
+                <div style="color: #6a9955; margin-bottom: 10px;"># اكتب الكود هنا (تلميح: استخدم for loop):</div>
+                <textarea class="code-input" id="mission-code" rows="4" placeholder="message = 'Mjqqt Btwqi!'&#10;shift = 5&#10;# اكتب الكود..." style="resize: vertical;"></textarea>
+                <button class="cyber-btn primary" id="run-mission">🚀 تشغيل الكود</button>
+                <div class="code-output" id="mission-output"></div>
+            </div>
+
+            <div id="mission-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">أحسنت! فككت الشفرة!</h3>
+                <button class="cyber-btn primary" id="go-to-ctf">الانتقال للتحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي CTF</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 2, () => {
+                CE.agentSpeak('correct', '🔮 استخدم عجلة التشفير لفهم كيف يعمل قيصر!');
+            });
+
+            // Cipher wheel
+            const wheel = document.getElementById('cipher-wheel');
+            const center = document.getElementById('wheel-center');
+            const slider = document.getElementById('shift-slider');
+            const shiftVal = document.getElementById('shift-value');
+
+            const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+            function drawWheel() {
+                wheel.querySelectorAll('.cipher-letter').forEach(el => el.remove());
+                const shift = parseInt(slider.value);
+                shiftVal.textContent = shift;
+                center.textContent = `A → ${alphabet[shift]}`;
+
+                for (let i = 0; i < 26; i++) {
+                    const angle = (i * 360 / 26) - 90;
+                    const rad = angle * Math.PI / 180;
+                    const x = 50 + 40 * Math.cos(rad);
+                    const y = 50 + 40 * Math.sin(rad);
+
+                    const el = document.createElement('div');
+                    el.className = 'cipher-letter';
+                    el.textContent = alphabet[i];
+                    el.style.left = x + '%';
+                    el.style.top = y + '%';
+                    el.style.transform = 'translate(-50%, -50%)';
+                    el.style.color = i === 0 ? '#00ff41' : '#00d4ff';
+                    wheel.appendChild(el);
+                }
+            }
+
+            drawWheel();
+            slider.addEventListener('input', drawWheel);
+
+            // Caesar cipher function
+            function caesar(text, shift, decode = false) {
+                const s = decode ? (26 - shift) : shift;
+                return text.split('').map(char => {
+                    if (char.match(/[a-z]/i)) {
+                        const code = char.charCodeAt(0);
+                        const base = code >= 97 ? 97 : 65;
+                        return String.fromCharCode(((code - base + s) % 26) + base);
+                    }
+                    return char;
+                }).join('');
+            }
+
+            // Run variable demo
+            document.getElementById('run-var').addEventListener('click', () => {
+                const code1 = document.getElementById('var-input').value;
+                const code2 = document.getElementById('var-input2').value;
+                const output = document.getElementById('var-output');
+
+                try {
+                    // Simple eval for demo (safe in this context)
+                    eval(code1);
+                    eval(code2);
+                    output.innerHTML = `<span style="color: #00ff41;">✅ name = "${name}"</span>\n<span style="color: #00ff41;">✅ age = ${age}</span>\n<span style="color: #00d4ff;">📊 نوع name: ${typeof name}</span>\n<span style="color: #00d4ff;">📊 نوع age: ${typeof age}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ خطأ: ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            // Run cipher demo
+            document.getElementById('run-cipher').addEventListener('click', () => {
+                const text = document.getElementById('cipher-input').value;
+                const shift = parseInt(slider.value);
+                const result = caesar(text, shift, true);
+                document.getElementById('cipher-output').innerHTML = 
+                    `<span style="color: #00ff41;">🔓 النص الأصلي: ${result}</span>`;
+                CE.audio.success();
+            });
+
+            // Mission
+            document.getElementById('run-mission').addEventListener('click', () => {
+                const code = document.getElementById('mission-code').value;
+                const output = document.getElementById('mission-output');
+
+                try {
+                    let result = '';
+                    const originalLog = console.log;
+                    console.log = (...args) => { result += args.join(' ') + '\n'; };
+
+                    eval(code);
+                    console.log = originalLog;
+
+                    output.innerHTML = `<span style="color: #00ff41;">📤 النتيجة:\n${result || '(لا يوجد output)'}</span>`;
+
+                    if (result.toLowerCase().includes('hello') || result.toLowerCase().includes('world')) {
+                        document.getElementById('mission-complete').style.display = 'block';
+                        CE.audio.success();
+                        CE.agentSpeak('correct', '🎉 ممتاز! فككت شفرة PHANTOM!');
+                        CE.addXP(75, 'Cipher Cracked');
+                    } else {
+                        CE.agentSpeak('hint', '💡 فكّر: هل الناتج يحتوي على كلمة مفهومة بالإنجليزية؟');
+                    }
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ خطأ: ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            // Go to CTF
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                initQuiz();
+            });
+
+            // Quiz
+            const questions = [
+                { q: 'في Python، أي نوع بيانات يُستخدم لتخزين النصوص؟', options: ['int', 'str', 'float', 'bool'], correct: 1 },
+                { q: 'إذا كان shift = 3، فإن "ABC" تصبح:', options: ['DEF', 'XYZ', 'CBA', 'EFG'], correct: 0 },
+                { q: 'ما هو ناتج: x = 5 + 3 ؟', options: ['53', '8', '15', 'Error'], correct: 1 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() {
+                currentQ = 0; score = 0; showQuestion();
+            }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(2, 100 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 2, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: استخدم chr() و ord() في Python للتشفير!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

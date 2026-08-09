@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 7: Lists & Dictionaries</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .memory-fragments {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            max-width: 500px;
+            margin: 20px auto;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+            border: 1px solid var(--neon-pink);
+        }
+        .fragment {
+            aspect-ratio: 1;
+            border: 2px solid var(--neon-blue);
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0, 212, 255, 0.05);
+            position: relative;
+        }
+        .fragment:hover {
+            background: rgba(0, 212, 255, 0.2);
+            transform: scale(1.05);
+        }
+        .fragment.selected {
+            border-color: var(--neon-gold);
+            box-shadow: 0 0 15px var(--neon-gold);
+            background: rgba(255, 215, 0, 0.2);
+        }
+        .fragment.correct {
+            border-color: var(--neon-green);
+            background: rgba(0, 255, 65, 0.3);
+            animation: fragmentCorrect 0.5s;
+        }
+        .fragment.wrong {
+            border-color: var(--neon-red);
+            background: rgba(255, 51, 51, 0.3);
+            animation: fragmentWrong 0.5s;
+        }
+        @keyframes fragmentCorrect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        @keyframes fragmentWrong {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+        .fragment-index {
+            position: absolute;
+            top: 2px;
+            left: 4px;
+            font-size: 0.6rem;
+            color: rgba(255,255,255,0.4);
+        }
+        .fragment-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        .fragment-type {
+            font-size: 0.6rem;
+            color: var(--neon-blue);
+            margin-top: 2px;
+        }
+        .python-playground {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--neon-blue);
+            direction: ltr;
+            text-align: left;
+        }
+        .code-input {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: var(--font-mono);
+            width: 100%;
+            border-radius: 4px;
+            margin: 5px 0;
+            direction: ltr;
+            text-align: left;
+        }
+        .code-output {
+            background: #0d0d0d;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            min-height: 50px;
+            direction: ltr;
+            text-align: left;
+        }
+        .dict-visual {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+            justify-content: center;
+        }
+        .dict-pair {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--neon-pink);
+            border-radius: 8px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+        }
+        .dict-key {
+            color: var(--neon-gold);
+            font-weight: bold;
+        }
+        .dict-arrow {
+            color: var(--neon-blue);
+        }
+        .dict-value {
+            color: var(--neon-green);
+        }
+        .mission-terminal {
+            background: #0a0a0f;
+            border: 1px solid var(--neon-red);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            direction: ltr;
+            text-align: left;
+            margin: 15px 0;
+        }
+        .mission-step {
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .mission-step.done {
+            color: var(--neon-green);
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+        .track-step {
+            text-align: center;
+            opacity: 0.3;
+            transition: all 0.5s;
+        }
+        .track-step.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .track-step.completed {
+            opacity: 1;
+            color: var(--neon-green);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 7">LEVEL 7</h1>
+            <p class="cyber-subtitle">📦 Lists & Dictionaries — فك شفرة الذاكرة</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- PROGRESS TRACKER -->
+        <div class="progress-tracker" id="progress-tracker">
+            <div class="track-step active" data-step="1">
+                <div style="font-size: 1.5rem;">📚</div>
+                <div style="font-size: 0.7rem;">الدرس</div>
+            </div>
+            <div class="track-step" data-step="2">
+                <div style="font-size: 1.5rem;">🧩</div>
+                <div style="font-size: 0.7rem;">اللعبة</div>
+            </div>
+            <div class="track-step" data-step="3">
+                <div style="font-size: 1.5rem;">🎯</div>
+                <div style="font-size: 0.7rem;">المهمة</div>
+            </div>
+            <div class="track-step" data-step="4">
+                <div style="font-size: 1.5rem;">🏆</div>
+                <div style="font-size: 0.7rem;">CTF</div>
+            </div>
+        </div>
+
+        <!-- LESSON: Lists -->
+        <div class="cyber-section fade-in-up" id="lesson-lists">
+            <h2>📚 الدرس الأول: القوائم (Lists)</h2>
+            <p>القائمة في Python هي <strong>صندوق يحتوي على عناصر متعددة</strong>، وكل عنصر له رقم (index) يبدأ من 0!</p>
+
+            <div class="python-playground">
+                <div style="color: #6a9955; margin-bottom: 10px;"># جرب القوائم:</div>
+                <input type="text" class="code-input" id="list-input" value="hackers = ['Alice', 'Bob', 'Charlie']" placeholder="hackers = ['Alice', 'Bob', 'Charlie']">
+                <input type="text" class="code-input" id="list-input2" value="print(hackers[0])" placeholder="print(hackers[0])">
+                <button class="cyber-btn" id="run-list">▶️ تشغيل</button>
+                <div class="code-output" id="list-output">اضغط "تشغيل" لرؤية النتيجة...</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p><strong>🔧 أوامر القوائم المهمة:</strong></p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <code>list.append(x)</code>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">إضافة عنصر في النهاية</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <code>list.remove(x)</code>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">حذف أول عنصر = x</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <code>list.pop(i)</code>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">حذف عنصر برقم i</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <code>len(list)</code>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">عدد العناصر</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="cyber-btn primary" id="next-dict">الدرس التالي: Dictionaries ➡️</button>
+            </div>
+        </div>
+
+        <!-- LESSON: Dictionaries -->
+        <div class="cyber-section fade-in-up" id="lesson-dict" style="display:none">
+            <h2>📚 الدرس الثاني: القواميس (Dictionaries)</h2>
+            <p>القاموس هو <strong>صندوق به مفاتيح وقيم</strong>! كل مفتاح يفتح قيمة معينة.</p>
+
+            <div class="dict-visual" id="dict-visual">
+                <div class="dict-pair">
+                    <span class="dict-key">"name"</span>
+                    <span class="dict-arrow">→</span>
+                    <span class="dict-value">"PHANTOM"</span>
+                </div>
+                <div class="dict-pair">
+                    <span class="dict-key">"level"</span>
+                    <span class="dict-arrow">→</span>
+                    <span class="dict-value">99</span>
+                </div>
+                <div class="dict-pair">
+                    <span class="dict-key">"status"</span>
+                    <span class="dict-arrow">→</span>
+                    <span class="dict-value">"defeated"</span>
+                </div>
+            </div>
+
+            <div class="python-playground">
+                <div style="color: #6a9955; margin-bottom: 10px;"># جرب القواميس:</div>
+                <input type="text" class="code-input" id="dict-input" value='agent = {"name": "Zero", "rank": "Elite", "xp": 5000}' placeholder='agent = {"name": "Zero", "rank": "Elite"}'>
+                <input type="text" class="code-input" id="dict-input2" value='print(agent["name"])' placeholder='print(agent["name"])'>
+                <button class="cyber-btn" id="run-dict">▶️ تشغيل</button>
+                <div class="code-output" id="dict-output">اضغط "تشغيل" لرؤية النتيجة...</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p><strong>🔧 أوامر القواميس المهمة:</strong></p>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <code>dict[key]</code>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">الوصول لقيمة</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <code>dict[key] = val</code>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">تعديل/إضافة</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <code>dict.keys()</code>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">جميع المفاتيح</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                        <code>dict.values()</code>
+                        <p style="font-size: 0.85rem; color: rgba(255,255,255,0.7);">جميع القيم</p>
+                    </div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="cyber-btn primary" id="next-game">ابدأ لعبة الذاكرة 🧩</button>
+            </div>
+        </div>
+
+        <!-- GAME: Memory Fragments -->
+        <div class="cyber-section fade-in-up" id="game-section" style="display:none">
+            <h2>🧩 لعبة: شظايا الذاكرة المشفرة</h2>
+            <p>PHANTOM خزّن بياناته في <strong>شظايا ذاكرة مشفرة</strong>. استخدم القوائم لترتيبها وكشف الرسالة!</p>
+
+            <div style="background: rgba(255,0,0,0.05); border: 1px solid var(--neon-red); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <p style="color: var(--neon-red);">🎯 الهدف: اضغط على الشظايا بالترتيب الصحيح (0 → 1 → 2 → 3 → 4)</p>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-top: 5px;">الرسالة المخفية: "OMEGA IS COMING"</p>
+            </div>
+
+            <div class="memory-fragments" id="memory-fragments"></div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <p style="font-family: var(--font-mono); color: var(--neon-gold);">التقدم: <span id="fragment-progress">0/5</span></p>
+                <button class="cyber-btn" id="reset-fragments">🔄 إعادة المحاولة</button>
+                <button class="cyber-btn" id="hint-fragments">💡 تلميح</button>
+            </div>
+
+            <div id="game-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">فككت شفرة الذاكرة!</h3>
+                <p style="color: var(--neon-red); font-family: var(--font-mono); margin-top: 10px;">OMEGA IS COMING...</p>
+                <button class="cyber-btn primary" id="next-mission">المهمة النهائية 🎯</button>
+            </div>
+        </div>
+
+        <!-- MISSION: Build the Agent Profile -->
+        <div class="cyber-section fade-in-up" id="mission-section" style="display:none">
+            <h2>🎯 المهمة: بناء ملف العميل السري</h2>
+            <p>لقد وجدت بيانات مشتتة عن "OMEGA". استخدم Dictionary لترتيبها!</p>
+
+            <div class="mission-terminal">
+                <p style="color: var(--neon-red); margin-bottom: 10px;">📁 ملف: omega_profile.json (مشفر)</p>
+                <div class="mission-step" id="step-1">❌ name = ???</div>
+                <div class="mission-step" id="step-2">❌ level = ???</div>
+                <div class="mission-step" id="step-3">❌ location = ???</div>
+                <div class="mission-step" id="step-4">❌ status = ???</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p>اكتب كود Python لبناء القاموس:</p>
+                <div class="python-playground">
+                    <textarea class="code-input" id="mission-code" rows="5" style="resize: vertical;" placeholder="omega = {}&#10;omega['name'] = 'OMEGA'&#10;# أكمل الباقي...">omega = {}
+omega['name'] = 'OMEGA'
+omega['level'] = 999
+omega['location'] = 'Unknown'
+omega['status'] = 'Active'
+print(omega)</textarea>
+                    <button class="cyber-btn primary" id="run-mission">🚀 تشغيل الكود</button>
+                    <div class="code-output" id="mission-output"></div>
+                </div>
+            </div>
+
+            <div id="mission-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+                <h3 style="color: var(--neon-red);">OMEGA موجود ونشط!</h3>
+                <p style="color: rgba(255,255,255,0.7);">لقد كشفت هوية العدو الجديد...</p>
+                <button class="cyber-btn primary" id="go-to-ctf">التحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي Lists & Dictionaries</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك! اجتزت المستوى 7!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 7, () => {
+                CE.agentSpeak('correct', '📦 PHANTOM خزّن بياناته في ذاكرة مشفرة! لنفكها!');
+            });
+
+            // Progress tracker
+            function setProgress(step) {
+                document.querySelectorAll('.track-step').forEach(s => {
+                    const sp = parseInt(s.dataset.step);
+                    s.classList.remove('active', 'completed');
+                    if (sp < step) s.classList.add('completed');
+                    else if (sp === step) s.classList.add('active');
+                });
+            }
+
+            // ========== LISTS DEMO ==========
+            document.getElementById('run-list').addEventListener('click', () => {
+                const code1 = document.getElementById('list-input').value;
+                const code2 = document.getElementById('list-input2').value;
+                const output = document.getElementById('list-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+                    eval(code1);
+                    eval(code2);
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">✅ ${result}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct', '🔥 القوائم سهلة! كل عنصر له رقم!');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('next-dict').addEventListener('click', () => {
+                document.getElementById('lesson-lists').style.display = 'none';
+                document.getElementById('lesson-dict').style.display = 'block';
+                document.getElementById('lesson-dict').scrollIntoView({ behavior: 'smooth' });
+                setProgress(2);
+                CE.audio.click();
+            });
+
+            // ========== DICT DEMO ==========
+            document.getElementById('run-dict').addEventListener('click', () => {
+                const code1 = document.getElementById('dict-input').value;
+                const code2 = document.getElementById('dict-input2').value;
+                const output = document.getElementById('dict-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+                    eval(code1);
+                    eval(code2);
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">✅ ${result}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct', '💡 القاموس: مفتاح يفتح قيمة!');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('next-game').addEventListener('click', () => {
+                document.getElementById('lesson-dict').style.display = 'none';
+                document.getElementById('game-section').style.display = 'block';
+                document.getElementById('game-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(2);
+                initFragments();
+                CE.audio.click();
+            });
+
+            // ========== MEMORY FRAGMENTS GAME ==========
+            const fragments = [
+                { value: 'O', type: 'str', correct: 0 },
+                { value: 'M', type: 'str', correct: 1 },
+                { value: 'E', type: 'str', correct: 2 },
+                { value: 'G', type: 'str', correct: 3 },
+                { value: 'A', type: 'str', correct: 4 }
+            ];
+            let currentOrder = 0;
+            let fragmentComplete = false;
+
+            function initFragments() {
+                currentOrder = 0;
+                fragmentComplete = false;
+                document.getElementById('game-complete').style.display = 'none';
+                document.getElementById('fragment-progress').textContent = '0/5';
+
+                // Shuffle fragments visually
+                const shuffled = [...fragments].sort(() => Math.random() - 0.5);
+                const grid = document.getElementById('memory-fragments');
+                grid.innerHTML = '';
+
+                shuffled.forEach((frag, i) => {
+                    const el = document.createElement('div');
+                    el.className = 'fragment';
+                    el.innerHTML = `
+                        <span class="fragment-index">${i}</span>
+                        <span class="fragment-value">${frag.value}</span>
+                        <span class="fragment-type">${frag.type}</span>
+                    `;
+                    el.dataset.correct = frag.correct;
+                    el.addEventListener('click', () => handleFragmentClick(el, frag.correct));
+                    grid.appendChild(el);
+                });
+            }
+
+            function handleFragmentClick(el, correctIndex) {
+                if (fragmentComplete) return;
+
+                if (parseInt(el.dataset.correct) === currentOrder) {
+                    el.classList.add('correct');
+                    el.classList.remove('wrong');
+                    currentOrder++;
+                    document.getElementById('fragment-progress').textContent = `${currentOrder}/5`;
+                    CE.audio.success();
+
+                    if (currentOrder >= 5) {
+                        fragmentComplete = true;
+                        document.getElementById('game-complete').style.display = 'block';
+                        CE.agentSpeak('correct', '🎉 فككت الذاكرة! OMEGA قادم!');
+                        CE.addXP(100, 'Memory Decrypted');
+                    }
+                } else {
+                    el.classList.add('wrong');
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong', '💥 ترتيب خاطئ! تذكر: نبدأ من index 0!');
+                    CE.state.currentSession.mistakes++;
+                    setTimeout(() => el.classList.remove('wrong'), 800);
+                }
+            }
+
+            document.getElementById('reset-fragments').addEventListener('click', initFragments);
+
+            document.getElementById('hint-fragments').addEventListener('click', () => {
+                CE.showSmartHint('ابحث عن الحرف O أولاً (index 0)، ثم M (index 1)...', 'memory-fragments');
+            });
+
+            document.getElementById('next-mission').addEventListener('click', () => {
+                document.getElementById('game-section').style.display = 'none';
+                document.getElementById('mission-section').style.display = 'block';
+                document.getElementById('mission-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(3);
+                CE.audio.click();
+            });
+
+            // ========== MISSION ==========
+            document.getElementById('run-mission').addEventListener('click', () => {
+                const code = document.getElementById('mission-code').value;
+                const output = document.getElementById('mission-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+                    eval(code);
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">📤 ${result}</span>`;
+
+                    // Check if all keys exist
+                    const hasName = code.includes("'name'") || code.includes('"name"');
+                    const hasLevel = code.includes("'level'") || code.includes('"level"');
+                    const hasLoc = code.includes("'location'") || code.includes('"location"');
+                    const hasStatus = code.includes("'status'") || code.includes('"status"');
+
+                    if (hasName) document.getElementById('step-1').classList.add('done');
+                    if (hasLevel) document.getElementById('step-2').classList.add('done');
+                    if (hasLoc) document.getElementById('step-3').classList.add('done');
+                    if (hasStatus) document.getElementById('step-4').classList.add('done');
+
+                    if (hasName && hasLevel && hasLoc && hasStatus) {
+                        document.getElementById('mission-complete').style.display = 'block';
+                        CE.audio.hack();
+                        CE.agentSpeak('correct', '⚠️ OMEGA نشط! استعد للمعركة!');
+                        CE.addXP(100, 'Profile Built');
+                    }
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('mission-section').style.display = 'none';
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(4);
+                initQuiz();
+                CE.audio.click();
+            });
+
+            // ========== CTF ==========
+            const questions = [
+                { q: 'ما هو index العنصر الأول في قائمة Python؟', options: ['0', '1', '-1', 'null'], correct: 0 },
+                { q: 'أي دالة تُضيف عنصراً لنهاية القائمة؟', options: ['add()', 'append()', 'push()', 'insert()'], correct: 1 },
+                { q: 'في القاموس: agent["name"] تعني:', options: ['المفتاح name', 'القيمة name', 'حذف name', 'إنشاء name'], correct: 0 },
+                { q: 'ما ناتج: len([1, 2, 3]) ؟', options: ['2', '3', '4', 'Error'], correct: 1 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() { currentQ = 0; score = 0; showQuestion(); }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(7, 150 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 7, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: القوائم تبدأ من 0، والقواميس تستخدم مفاتيح!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

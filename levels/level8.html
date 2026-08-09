@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 8: File Handling</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .file-system {
+            background: #0a0a0f;
+            border: 1px solid var(--neon-green);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            direction: ltr;
+            text-align: left;
+            min-height: 250px;
+            position: relative;
+        }
+        .fs-path {
+            color: var(--neon-blue);
+            border-bottom: 1px solid rgba(0,255,65,0.2);
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+        }
+        .fs-item {
+            padding: 6px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .fs-item:hover {
+            background: rgba(0,255,65,0.1);
+        }
+        .fs-item.selected {
+            background: rgba(0,212,255,0.2);
+            border: 1px solid var(--neon-blue);
+        }
+        .fs-folder { color: var(--neon-gold); }
+        .fs-file { color: var(--neon-green); }
+        .fs-secret { color: var(--neon-red); animation: secretPulse 2s infinite; }
+        @keyframes secretPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .file-preview {
+            background: #1e1e1e;
+            border: 1px solid var(--neon-pink);
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            direction: ltr;
+            text-align: left;
+            min-height: 100px;
+            color: #d4d4d4;
+        }
+        .python-playground {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--neon-blue);
+            direction: ltr;
+            text-align: left;
+        }
+        .code-input {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: var(--font-mono);
+            width: 100%;
+            border-radius: 4px;
+            margin: 5px 0;
+            direction: ltr;
+            text-align: left;
+        }
+        .code-output {
+            background: #0d0d0d;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            min-height: 50px;
+            direction: ltr;
+            text-align: left;
+        }
+        .heist-tracker {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--neon-red);
+            border-radius: 8px;
+            padding: 15px 20px;
+            margin: 15px 0;
+        }
+        .heist-step {
+            text-align: center;
+            opacity: 0.3;
+            transition: all 0.5s;
+        }
+        .heist-step.active {
+            opacity: 1;
+            transform: scale(1.1);
+            color: var(--neon-gold);
+        }
+        .heist-step.completed {
+            opacity: 1;
+            color: var(--neon-green);
+        }
+        .heist-arrow {
+            color: var(--neon-blue);
+            font-size: 1.2rem;
+        }
+        .timer-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 10px 0;
+            border: 1px solid var(--neon-red);
+        }
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--neon-green), var(--neon-red));
+            width: 100%;
+            transition: width 1s linear;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 8">LEVEL 8</h1>
+            <p class="cyber-subtitle">📁 File Handling — عملية سرقة الملفات</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- HEIST TRACKER -->
+        <div class="heist-tracker" id="heist-tracker">
+            <div class="heist-step active" data-step="1">
+                <div style="font-size: 1.5rem;">📚</div>
+                <div style="font-size: 0.7rem;">الدرس</div>
+            </div>
+            <div class="heist-arrow">➜</div>
+            <div class="heist-step" data-step="2">
+                <div style="font-size: 1.5rem;">🕵️</div>
+                <div style="font-size: 0.7rem;">الاستطلاع</div>
+            </div>
+            <div class="heist-arrow">➜</div>
+            <div class="heist-step" data-step="3">
+                <div style="font-size: 1.5rem;">💾</div>
+                <div style="font-size: 0.7rem;">السرقة</div>
+            </div>
+            <div class="heist-arrow">➜</div>
+            <div class="heist-step" data-step="4">
+                <div style="font-size: 1.5rem;">🏆</div>
+                <div style="font-size: 0.7rem;">CTF</div>
+            </div>
+        </div>
+
+        <!-- LESSON: File Handling -->
+        <div class="cyber-section fade-in-up" id="lesson-section">
+            <h2>📚 الدرس: التعامل مع الملفات في Python</h2>
+            <p>في عالم الاختراق، <strong>الملفات هي الكنز</strong>! تعلم كيف تقرأها وتكتبها وتسرقها!</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 15px; border: 1px solid var(--neon-green); direction: ltr; text-align: left;">
+                    <h4 style="color: var(--neon-green); margin-bottom: 8px;">📖 قراءة ملف</h4>
+                    <pre style="font-family: var(--font-mono); color: #d4d4d4; font-size: 0.85rem; line-height: 1.6;">with open('file.txt', 'r') as f:
+    data = f.read()
+    print(data)</pre>
+                </div>
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 15px; border: 1px solid var(--neon-blue); direction: ltr; text-align: left;">
+                    <h4 style="color: var(--neon-blue); margin-bottom: 8px;">✍️ كتابة ملف</h4>
+                    <pre style="font-family: var(--font-mono); color: #d4d4d4; font-size: 0.85rem; line-height: 1.6;">with open('file.txt', 'w') as f:
+    f.write('Secret!')</pre>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <p><strong>🔧 أوضاع الفتح:</strong></p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-green);">'r'</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">قراءة</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-blue);">'w'</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">كتابة</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-gold);">'a'</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">إضافة</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-pink);">'x'</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">إنشاء</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="python-playground" style="margin-top: 20px;">
+                <div style="color: #6a9955; margin-bottom: 10px;"># جرب بنفسك:</div>
+                <textarea class="code-input" id="file-code" rows="3" placeholder="with open('test.txt', 'w') as f:&#10;    f.write('Hello Agent!')">with open('test.txt', 'w') as f:
+    f.write('Hello Agent!')
+print("File written!")</textarea>
+                <button class="cyber-btn" id="run-file-demo">▶️ تشغيل</button>
+                <div class="code-output" id="file-demo-output">اضغط "تشغيل"...</div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="cyber-btn primary" id="next-recon">ابدأ الاستطلاع 🕵️</button>
+            </div>
+        </div>
+
+        <!-- RECON: File System Explorer -->
+        <div class="cyber-section fade-in-up" id="recon-section" style="display:none">
+            <h2>🕵️ الاستطلاع: استكشاف نظام ملفات OMEGA</h2>
+            <p>لقد اخترقنا خادم OMEGA! استكشف الملفات وابحث عن <strong>config.bak</strong></p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div>
+                    <h4 style="color: var(--neon-green); margin-bottom: 10px;">📁 نظام الملفات:</h4>
+                    <div class="file-system" id="file-system">
+                        <div class="fs-path" id="fs-path">/omega_server/</div>
+                        <div id="fs-contents"></div>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: var(--neon-blue); margin-bottom: 10px;">📄 معاينة الملف:</h4>
+                    <div class="file-preview" id="file-preview">
+                        <span style="color: rgba(255,255,255,0.3);">اضغط على ملف لمعاينته...</span>
+                    </div>
+                    <div style="margin-top: 15px; text-align: center;">
+                        <button class="cyber-btn" id="hint-recon">💡 تلميح</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="recon-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎯</div>
+                <h3 style="color: var(--neon-green);">وجدت config.bak!</h3>
+                <button class="cyber-btn primary" id="next-heist">ابدأ عملية السرقة 💾</button>
+            </div>
+        </div>
+
+        <!-- HEIST: The File Steal -->
+        <div class="cyber-section fade-in-up" id="heist-section" style="display:none">
+            <h2>💾 عملية السرقة: استخراج البيانات</h2>
+            <p>الملف محمي! استخدم Python لفتحه وقراءته قبل أن ينتهي الوقت!</p>
+
+            <div class="timer-bar">
+                <div class="timer-fill" id="timer-fill" style="width: 100%"></div>
+            </div>
+            <p style="text-align: center; font-family: var(--font-mono); color: var(--neon-red);" id="timer-text">⏱️ الوقت المتبقي: 60 ثانية</p>
+
+            <div style="background: rgba(255,0,0,0.05); border: 1px solid var(--neon-red); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <p style="color: var(--neon-red);">🎯 الهدف: اكتب كود Python يقرأ ملف "config.bak" ويطبع محتواه</p>
+                <p style="color: rgba(255,255,255,0.7); font-size: 0.9rem; margin-top: 5px;">تلميح: استخدم with open('config.bak', 'r')</p>
+            </div>
+
+            <div class="python-playground">
+                <div style="color: #6a9955; margin-bottom: 10px;"># اكتب كود السرقة:</div>
+                <textarea class="code-input" id="heist-code" rows="4" style="resize: vertical;" placeholder="# اقرأ config.bak هنا...">with open('config.bak', 'r') as f:
+    secret = f.read()
+print(secret)</textarea>
+                <button class="cyber-btn primary" id="run-heist">🚀 تنفيذ السرقة</button>
+                <div class="code-output" id="heist-output"></div>
+            </div>
+
+            <div id="heist-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">تمت السرقة بنجاح!</h3>
+                <p style="color: var(--neon-red); font-family: var(--font-mono); margin-top: 10px;">OMEGA_LOCATION=Sector_7</p>
+                <button class="cyber-btn primary" id="go-to-ctf">التحدي النهائي ➡️</button>
+            </div>
+
+            <div id="heist-failed" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">💀</div>
+                <h3 style="color: var(--neon-red);">انتهى الوقت! اكتشفك OMEGA!</h3>
+                <button class="cyber-btn" id="retry-heist">🔄 إعادة المحاولة</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي File Handling المتقدم</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك! اجتزت المستوى 8!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 8, () => {
+                CE.agentSpeak('correct', '📁 OMEGA خزّن أسراره في ملفات! لنسرقها!');
+            });
+
+            // Progress tracker
+            function setProgress(step) {
+                document.querySelectorAll('.heist-step').forEach(s => {
+                    const sp = parseInt(s.dataset.step);
+                    s.classList.remove('active', 'completed');
+                    if (sp < step) s.classList.add('completed');
+                    else if (sp === step) s.classList.add('active');
+                });
+            }
+
+            // ========== LESSON DEMO ==========
+            document.getElementById('run-file-demo').addEventListener('click', () => {
+                const code = document.getElementById('file-code').value;
+                const output = document.getElementById('file-demo-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+                    eval(code);
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">✅ ${result}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct', '💡 with open() هو الطريقة الآمنة للملفات!');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('next-recon').addEventListener('click', () => {
+                document.getElementById('lesson-section').style.display = 'none';
+                document.getElementById('recon-section').style.display = 'block';
+                document.getElementById('recon-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(2);
+                initFileSystem();
+                CE.audio.click();
+            });
+
+            // ========== FILE SYSTEM RECON ==========
+            const fsData = {
+                '/omega_server/': {
+                    type: 'dir',
+                    items: [
+                        { name: 'logs/', type: 'dir' },
+                        { name: 'users/', type: 'dir' },
+                        { name: 'secrets/', type: 'dir' },
+                        { name: 'readme.txt', type: 'file', content: 'Welcome to OMEGA server.\nUnauthorized access is prohibited.\n\n- OMEGA Admin' },
+                        { name: 'banner.txt', type: 'file', content: 'OMEGA CORP - SECURE SYSTEM' }
+                    ]
+                },
+                '/omega_server/logs/': {
+                    type: 'dir',
+                    items: [
+                        { name: 'access.log', type: 'file', content: '192.168.1.50 - LOGIN FAILED\n192.168.1.51 - LOGIN SUCCESS\n192.168.1.100 - ADMIN ACCESS' },
+                        { name: 'error.log', type: 'file', content: 'Error: config.bak not found in default location' }
+                    ]
+                },
+                '/omega_server/users/': {
+                    type: 'dir',
+                    items: [
+                        { name: 'admin.txt', type: 'file', content: 'User: admin\nStatus: ACTIVE\nLast Login: 2026-08-08' },
+                        { name: 'guest.txt', type: 'file', content: 'User: guest\nStatus: DISABLED' }
+                    ]
+                },
+                '/omega_server/secrets/': {
+                    type: 'dir',
+                    items: [
+                        { name: 'config.bak', type: 'secret', content: 'OMEGA_LOCATION=Sector_7\nOMEGA_KEY=XK-99-ALPHA\nOMEGA_STATUS=ARMED\n\nWARNING: DO NOT SHARE' },
+                        { name: 'backup.key', type: 'file', content: 'ENCRYPTED_KEY_BLOCK' }
+                    ]
+                }
+            };
+
+            let currentPath = '/omega_server/';
+            let foundSecret = false;
+
+            function initFileSystem() {
+                currentPath = '/omega_server/';
+                foundSecret = false;
+                document.getElementById('recon-complete').style.display = 'none';
+                renderFS();
+            }
+
+            function renderFS() {
+                const pathEl = document.getElementById('fs-path');
+                const contentsEl = document.getElementById('fs-contents');
+                const previewEl = document.getElementById('file-preview');
+
+                pathEl.textContent = currentPath;
+                contentsEl.innerHTML = '';
+
+                // Back button
+                if (currentPath !== '/omega_server/') {
+                    const back = document.createElement('div');
+                    back.className = 'fs-item';
+                    back.innerHTML = '<span>📁</span><span>../</span>';
+                    back.addEventListener('click', () => {
+                        const parts = currentPath.split('/').filter(Boolean);
+                        parts.pop();
+                        currentPath = '/' + parts.join('/') + '/';
+                        renderFS();
+                        CE.audio.click();
+                    });
+                    contentsEl.appendChild(back);
+                }
+
+                const dir = fsData[currentPath];
+                if (dir && dir.items) {
+                    dir.items.forEach(item => {
+                        const el = document.createElement('div');
+                        el.className = 'fs-item';
+                        const icon = item.type === 'dir' ? '📁' : (item.type === 'secret' ? '🔴' : '📄');
+                        const nameClass = item.type === 'dir' ? 'fs-folder' : (item.type === 'secret' ? 'fs-secret' : 'fs-file');
+                        el.innerHTML = `<span>${icon}</span><span class="${nameClass}">${item.name}</span>`;
+
+                        el.addEventListener('click', () => {
+                            document.querySelectorAll('.fs-item').forEach(i => i.classList.remove('selected'));
+                            el.classList.add('selected');
+
+                            if (item.type === 'dir') {
+                                currentPath = currentPath + item.name;
+                                renderFS();
+                            } else {
+                                previewEl.innerHTML = `<div style="color: var(--neon-green); margin-bottom: 8px;">📄 ${item.name}</div><div style="white-space: pre-wrap;">${item.content}</div>`;
+
+                                if (item.type === 'secret' && !foundSecret) {
+                                    foundSecret = true;
+                                    document.getElementById('recon-complete').style.display = 'block';
+                                    CE.audio.hack();
+                                    CE.agentSpeak('correct', '🔴 وجدت config.bak! يحتوي على أسرار OMEGA!');
+                                    CE.addXP(75, 'Secret Found');
+                                }
+                            }
+                            CE.audio.click();
+                        });
+
+                        contentsEl.appendChild(el);
+                    });
+                }
+            }
+
+            document.getElementById('hint-recon').addEventListener('click', () => {
+                CE.showSmartHint('ابحث في مجلد secrets/...', 'file-system');
+            });
+
+            document.getElementById('next-heist').addEventListener('click', () => {
+                document.getElementById('recon-section').style.display = 'none';
+                document.getElementById('heist-section').style.display = 'block';
+                document.getElementById('heist-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(3);
+                startTimer();
+                CE.audio.click();
+            });
+
+            // ========== HEIST TIMER ==========
+            let timeLeft = 60;
+            let timerInterval;
+            let heistActive = false;
+
+            function startTimer() {
+                timeLeft = 60;
+                heistActive = true;
+                document.getElementById('heist-complete').style.display = 'none';
+                document.getElementById('heist-failed').style.display = 'none';
+                document.getElementById('timer-fill').style.width = '100%';
+                document.getElementById('timer-text').textContent = '⏱️ الوقت المتبقي: 60 ثانية';
+
+                timerInterval = setInterval(() => {
+                    if (!heistActive) return;
+                    timeLeft--;
+                    const pct = (timeLeft / 60) * 100;
+                    document.getElementById('timer-fill').style.width = pct + '%';
+                    document.getElementById('timer-text').textContent = `⏱️ الوقت المتبقي: ${timeLeft} ثانية`;
+
+                    if (timeLeft <= 10) {
+                        document.getElementById('timer-text').style.color = '#ff3333';
+                        CE.audio.fail();
+                    }
+
+                    if (timeLeft <= 0) {
+                        heistActive = false;
+                        clearInterval(timerInterval);
+                        document.getElementById('heist-failed').style.display = 'block';
+                        CE.agentSpeak('wrong', '💀 انتهى الوقت! OMEGA أغلق النظام!');
+                    }
+                }, 1000);
+            }
+
+            document.getElementById('run-heist').addEventListener('click', () => {
+                if (!heistActive) return;
+
+                const code = document.getElementById('heist-code').value;
+                const output = document.getElementById('heist-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+
+                    // Simulate config.bak content
+                    const configContent = 'OMEGA_LOCATION=Sector_7\nOMEGA_KEY=XK-99-ALPHA\nOMEGA_STATUS=ARMED';
+
+                    // Check if code tries to read config.bak
+                    if (code.toLowerCase().includes('config.bak') && code.toLowerCase().includes('open')) {
+                        console.log(configContent);
+                        console.log = origLog;
+                        output.innerHTML = `<span style="color: #00ff41;">📤 ${result}</span>`;
+
+                        heistActive = false;
+                        clearInterval(timerInterval);
+                        document.getElementById('heist-complete').style.display = 'block';
+                        CE.audio.hack();
+                        CE.agentSpeak('correct', '🔥 سرقت البيانات! Sector 7 هو مكان OMEGA!');
+                        CE.addXP(100, 'Data Stolen');
+                    } else {
+                        console.log = origLog;
+                        output.innerHTML = `<span style="color: #ff3333;">❌ يجب أن تقرأ ملف config.bak!</span>`;
+                        CE.audio.fail();
+                        CE.agentSpeak('hint', '💡 استخدم: with open("config.bak", "r")');
+                        CE.state.currentSession.mistakes++;
+                    }
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('retry-heist').addEventListener('click', () => {
+                document.getElementById('heist-failed').style.display = 'none';
+                document.getElementById('heist-output').innerHTML = '';
+                startTimer();
+            });
+
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('heist-section').style.display = 'none';
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(4);
+                initQuiz();
+                CE.audio.click();
+            });
+
+            // ========== CTF ==========
+            const questions = [
+                { q: 'أي وضع يُستخدم لقراءة ملف في Python؟', options: ['w', 'r', 'a', 'x'], correct: 1 },
+                { q: 'لماذا نستخدم with open() بدلاً من open() فقط؟', options: ['أسرع', 'يغلق الملف تلقائياً', 'أقل أماناً', 'لا فرق'], correct: 1 },
+                { q: 'ماذا تفعل f.read()؟', options: ['تكتب ملف', 'تقرأ كل المحتوى', 'تحذف ملف', 'تغلق الملف'], correct: 1 },
+                { q: 'أي وضع يُنشئ ملفاً جديداً؟', options: ['r', 'w', 'a', 'x'], correct: 3 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() { currentQ = 0; score = 0; showQuestion(); }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(8, 150 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 8, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: with open("file", "r") as f: يقرأ، و"w" يكتب!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

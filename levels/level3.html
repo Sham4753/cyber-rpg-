@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 3: If/Else/Elif + Firewall</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .firewall-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            max-width: 400px;
+            margin: 20px auto;
+        }
+        .grid-cell {
+            aspect-ratio: 1;
+            border: 2px solid var(--neon-green);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(0, 255, 65, 0.05);
+        }
+        .grid-cell:hover {
+            background: rgba(0, 255, 65, 0.2);
+            transform: scale(1.05);
+        }
+        .grid-cell.active {
+            background: rgba(0, 255, 65, 0.4);
+            box-shadow: 0 0 15px var(--neon-green);
+        }
+        .grid-cell.blocked {
+            background: rgba(255, 51, 51, 0.3);
+            border-color: var(--neon-red);
+            cursor: not-allowed;
+        }
+        .grid-cell.target {
+            background: rgba(255, 215, 0, 0.3);
+            border-color: var(--neon-gold);
+            animation: targetPulse 1s infinite;
+        }
+        @keyframes targetPulse {
+            0%, 100% { box-shadow: 0 0 5px var(--neon-gold); }
+            50% { box-shadow: 0 0 20px var(--neon-gold); }
+        }
+        .code-builder {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        .code-block {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--neon-blue);
+            padding: 12px 15px;
+            border-radius: 8px;
+            cursor: grab;
+            font-family: var(--font-mono);
+            direction: ltr;
+            text-align: left;
+            transition: all 0.3s;
+        }
+        .code-block:hover {
+            background: rgba(0, 212, 255, 0.1);
+            transform: translateX(-5px);
+        }
+        .code-block.dragging {
+            opacity: 0.5;
+        }
+        .drop-zone {
+            min-height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 2px dashed var(--neon-green);
+            border-radius: 8px;
+            padding: 20px;
+            direction: ltr;
+            text-align: left;
+            font-family: var(--font-mono);
+        }
+        .drop-zone.drag-over {
+            background: rgba(0, 255, 65, 0.1);
+            border-color: var(--neon-gold);
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 3">LEVEL 3</h1>
+            <p class="cyber-subtitle">🛡️ If/Else/Elif + Firewall Grid</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- LESSON: If/Else -->
+        <div class="cyber-section fade-in-up">
+            <h2>📚 الدرس: الشروط في Python</h2>
+            <p>الشروط هي <strong>قرارات</strong> يتخذها البرنامج. مثل: "إذا كان الباب مفتوحاً، ادخل!"</p>
+
+            <div style="background: #1e1e1e; border-radius: 8px; padding: 20px; margin: 15px 0; border: 1px solid var(--neon-blue); direction: ltr; text-align: left; font-family: var(--font-mono);">
+                <div style="color: #c586c0;">if</div>
+                <div style="color: #9cdcfe;">password == "secret"</div>
+                <div style="color: #d4d4d4;">:</div>
+                <div style="color: #ce9178; padding-right: 20px;">    print("Access Granted!")</div>
+                <div style="color: #c586c0;">else</div>
+                <div style="color: #d4d4d4;">:</div>
+                <div style="color: #ce9178; padding-right: 20px;">    print("Access Denied!")</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p><strong>🔍 عوامل المقارنة:</strong></p>
+                <ul style="padding-right: 20px; line-height: 2; margin-top: 10px;">
+                    <li><code>==</code> يساوي</li>
+                    <li><code>!=</code> لا يساوي</li>
+                    <li><code>&gt;</code> أكبر من</li>
+                    <li><code>&lt;</code> أصغر من</li>
+                    <li><code>&gt;=</code> أكبر أو يساوي</li>
+                    <li><code>and</code> و</li>
+                    <li><code>or</code> أو</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- CODE BUILDER -->
+        <div class="cyber-section fade-in-up">
+            <h2>🧩 Code Builder: بنِ جدار الحماية</h2>
+            <p>اسحب الكتل ورتبها لبناء شرط يتحقق من كلمة المرور:</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div>
+                    <h4 style="color: var(--neon-blue); margin-bottom: 10px;">📦 الكتل المتاحة:</h4>
+                    <div class="code-builder" id="code-blocks">
+                        <div class="code-block" draggable="true" data-code="if password == 'cyber123':">if password == 'cyber123':</div>
+                        <div class="code-block" draggable="true" data-code="    print('Access Granted')">    print('Access Granted')</div>
+                        <div class="code-block" draggable="true" data-code="else:">else:</div>
+                        <div class="code-block" draggable="true" data-code="    print('Access Denied')">    print('Access Denied')</div>
+                        <div class="code-block" draggable="true" data-code="elif password == 'admin':">elif password == 'admin':</div>
+                        <div class="code-block" draggable="true" data-code="    print('Admin Access')">    print('Admin Access')</div>
+                    </div>
+                </div>
+                <div>
+                    <h4 style="color: var(--neon-green); margin-bottom: 10px;">🎯 منطقة التجميع:</h4>
+                    <div class="drop-zone" id="drop-zone">
+                        <span style="color: rgba(255,255,255,0.3);">اسحب الكتل هنا...</span>
+                    </div>
+                    <button class="cyber-btn" id="run-builder" style="margin-top: 10px;">▶️ تشغيل الكود</button>
+                    <div class="code-output" id="builder-output" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- FIREWALL GRID GAME -->
+        <div class="cyber-section fade-in-up">
+            <h2>🛡️ لعبة شبكة الحماية 4×4</h2>
+            <p>انقر على الخلايا لتفعيلها. يجب أن تصل من الزاوية العلوية اليسرى إلى الزاوية السفلية اليمنى!</p>
+            <p style="color: var(--neon-gold); margin-top: 10px;">🎯 الهدف: ابحث عن المسار الآمن (الخلايا الخضراء)</p>
+
+            <div class="firewall-grid" id="firewall-grid"></div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="cyber-btn" id="reset-grid">🔄 إعادة المحاولة</button>
+                <button class="cyber-btn" id="hint-grid">💡 تلميح</button>
+            </div>
+
+            <div id="grid-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">أحسنت! اخترقت الشبكة!</h3>
+                <button class="cyber-btn primary" id="go-to-ctf">الانتقال للتحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي Elif المتقدم</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 3, () => {
+                CE.agentSpeak('correct', '🛡️ بنِ جدار الحماية باستخدام If/Else!');
+            });
+
+            // Code Builder - Drag & Drop
+            const dropZone = document.getElementById('drop-zone');
+            let draggedBlock = null;
+
+            document.querySelectorAll('.code-block').forEach(block => {
+                block.addEventListener('dragstart', (e) => {
+                    draggedBlock = block;
+                    block.classList.add('dragging');
+                    e.dataTransfer.effectAllowed = 'copy';
+                });
+                block.addEventListener('dragend', () => {
+                    block.classList.remove('dragging');
+                });
+            });
+
+            dropZone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropZone.classList.add('drag-over');
+            });
+
+            dropZone.addEventListener('dragleave', () => {
+                dropZone.classList.remove('drag-over');
+            });
+
+            dropZone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('drag-over');
+                if (draggedBlock) {
+                    if (dropZone.querySelector('span')) dropZone.innerHTML = '';
+                    const clone = document.createElement('div');
+                    clone.className = 'code-block';
+                    clone.textContent = draggedBlock.dataset.code;
+                    clone.style.marginBottom = '5px';
+                    clone.style.cursor = 'pointer';
+                    clone.addEventListener('click', () => clone.remove());
+                    dropZone.appendChild(clone);
+                    CE.audio.click();
+                }
+            });
+
+            document.getElementById('run-builder').addEventListener('click', () => {
+                const blocks = dropZone.querySelectorAll('.code-block');
+                let code = '';
+                blocks.forEach(b => code += b.textContent + '\n');
+                code += "\nprint('Test with password=cyber123')";
+
+                const output = document.getElementById('builder-output');
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+                    eval(code);
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">✅ ${result}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct', '🔥 كود ممتاز!');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            // Firewall Grid Game
+            const gridSize = 4;
+            let grid = [];
+            let path = [];
+            let gridComplete = false;
+
+            function initGrid() {
+                grid = [];
+                path = [];
+                gridComplete = false;
+                document.getElementById('grid-complete').style.display = 'none';
+
+                // Generate random safe path
+                let x = 0, y = 0;
+                path.push({x, y});
+                while (x < gridSize - 1 || y < gridSize - 1) {
+                    if (x < gridSize - 1 && (y === gridSize - 1 || Math.random() > 0.5)) {
+                        x++;
+                    } else {
+                        y++;
+                    }
+                    path.push({x, y});
+                }
+
+                // Create grid
+                const gridEl = document.getElementById('firewall-grid');
+                gridEl.innerHTML = '';
+                for (let r = 0; r < gridSize; r++) {
+                    for (let c = 0; c < gridSize; c++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'grid-cell';
+                        cell.dataset.row = r;
+                        cell.dataset.col = c;
+
+                        if (r === 0 && c === 0) {
+                            cell.textContent = '🚀';
+                            cell.classList.add('active');
+                        } else if (r === gridSize - 1 && c === gridSize - 1) {
+                            cell.textContent = '🏁';
+                            cell.classList.add('target');
+                        }
+
+                        cell.addEventListener('click', () => handleCellClick(r, c, cell));
+                        gridEl.appendChild(cell);
+                    }
+                }
+            }
+
+            function handleCellClick(r, c, cell) {
+                if (gridComplete) return;
+
+                const isPath = path.some(p => p.x === c && p.y === r);
+
+                if (isPath) {
+                    cell.classList.add('active');
+                    cell.textContent = '✓';
+                    CE.audio.success();
+
+                    // Check if reached target
+                    if (r === gridSize - 1 && c === gridSize - 1) {
+                        gridComplete = true;
+                        document.getElementById('grid-complete').style.display = 'block';
+                        CE.agentSpeak('correct', '🎉 اخترقت جدار الحماية!');
+                        CE.addXP(75, 'Firewall Breached');
+                    }
+                } else {
+                    cell.classList.add('blocked');
+                    cell.textContent = '✗';
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong', '💥 هذا المسار محظور! جرب مكاناً آخر.');
+                    CE.state.currentSession.mistakes++;
+                    setTimeout(() => {
+                        cell.classList.remove('blocked');
+                        cell.textContent = '';
+                    }, 1000);
+                }
+            }
+
+            document.getElementById('reset-grid').addEventListener('click', initGrid);
+
+            document.getElementById('hint-grid').addEventListener('click', () => {
+                CE.showSmartHint('ابدأ من 🚀 وتحرك يميناً وأسفل فقط!', 'firewall-grid');
+            });
+
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                initQuiz();
+            });
+
+            initGrid();
+
+            // Quiz
+            const questions = [
+                { q: 'ما هو ناتج: 5 > 3 ?', options: ['True', 'False', '5', 'Error'], correct: 0 },
+                { q: 'أي عامل يعني "و" (يجب تحقق الشرطين)؟', options: ['or', 'and', 'not', '=='], correct: 1 },
+                { q: 'elif تُستخدم لـ:', options: ['شرط إضافي', 'نهاية البرنامج', 'طباعة نص', 'تعريف دالة'], correct: 0 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() { currentQ = 0; score = 0; showQuestion(); }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(3, 100 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 3, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: If يتحقق من شرط، Else يتنفذ إذا فشل الشرط!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

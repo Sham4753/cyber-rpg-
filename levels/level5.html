@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 5: Functions + Tool Assembly</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .tool-assembly {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+        .tool-part {
+            width: 100px;
+            height: 100px;
+            border: 2px solid #333;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            background: rgba(0,0,0,0.5);
+            transition: all 0.5s;
+            position: relative;
+        }
+        .tool-part.collected {
+            border-color: var(--neon-gold);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+            animation: partGlow 2s infinite;
+        }
+        @keyframes partGlow {
+            0%, 100% { box-shadow: 0 0 10px rgba(255, 215, 0, 0.3); }
+            50% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.6); }
+        }
+        .tool-part-name {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.6);
+            margin-top: 5px;
+            text-align: center;
+        }
+        .function-demo {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--neon-blue);
+            direction: ltr;
+            text-align: left;
+            font-family: var(--font-mono);
+        }
+        .function-input {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #d4d4d4;
+            padding: 10px;
+            font-family: var(--font-mono);
+            border-radius: 4px;
+            margin: 5px 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 5">LEVEL 5</h1>
+            <p class="cyber-subtitle">🔧 Functions + Tool Assembly</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- LESSON: Functions -->
+        <div class="cyber-section fade-in-up">
+            <h2>📚 الدرس: الدوال في Python</h2>
+            <p>الدالة هي <strong>آلة صغيرة</strong> تقوم بمهمة محددة. نعرفها بـ <code>def</code> ونستدعيها باسمها!</p>
+
+            <div class="function-demo">
+                <div style="color: #c586c0;">def</div>
+                <div style="color: #dcdcaa;">hack_password</div>
+                <div style="color: #d4d4d4;">(password):</div>
+                <div style="color: #ce9178; padding-right: 20px;">    if password == "1234":</div>
+                <div style="color: #ce9178; padding-right: 40px;">        return "Weak!"</div>
+                <div style="color: #ce9178; padding-right: 20px;">    else:</div>
+                <div style="color: #ce9178; padding-right: 40px;">        return "Strong!"</div>
+                <div style="color: #6a9955; margin-top: 10px;"># استدعاء الدالة:</div>
+                <div style="color: #d4d4d4;">result = hack_password("1234")</div>
+                <div style="color: #d4d4d4;">print(result)  # Weak!</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h4 style="color: var(--neon-gold);">🎮 جرب بنفسك:</h4>
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin-top: 10px;">
+                    <input type="text" class="function-input" id="func-name" placeholder="اسم الدالة (مثل: greet)" value="greet">
+                    <input type="text" class="function-input" id="func-param" placeholder="المعامل (مثل: name)" value="name">
+                    <input type="text" class="function-input" id="func-body" placeholder="جسم الدالة (مثل: return 'Hello ' + name)" value="return 'Hello ' + name">
+                    <input type="text" class="function-input" id="func-call" placeholder="استدعاء (مثل: greet('Agent'))" value="greet('Agent')">
+                    <button class="cyber-btn" id="run-function">▶️ تشغيل الدالة</button>
+                    <div class="code-output" id="func-output" style="margin-top: 10px;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOOL ASSEMBLY -->
+        <div class="cyber-section fade-in-up">
+            <h2>⚔️ تجميع أدوات الاختراق</h2>
+            <p>لقد جمعت أجزاءً من أداة قوية. حان وقت تجميعها!</p>
+
+            <div class="tool-assembly" id="tool-assembly">
+                <div class="tool-part" data-part="1">
+                    <div>💻</div>
+                    <div class="tool-part-name">Terminal</div>
+                </div>
+                <div class="tool-part" data-part="2">
+                    <div>🔮</div>
+                    <div class="tool-part-name">Crypto</div>
+                </div>
+                <div class="tool-part" data-part="3">
+                    <div>🛡️</div>
+                    <div class="tool-part-name">Firewall</div>
+                </div>
+                <div class="tool-part" data-part="4">
+                    <div>🔍</div>
+                    <div class="tool-part-name">Scanner</div>
+                </div>
+                <div class="tool-part" data-part="5">
+                    <div>⚔️</div>
+                    <div class="tool-part-name">Function</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <p style="color: var(--neon-gold); font-size: 1.2rem;">🔒 الأداة النهائية: تنين الاستغلال 🐉</p>
+                <div id="assembly-progress" style="margin-top: 15px;">
+                    <div class="progress-bar-bg" style="max-width: 400px; margin: 0 auto;">
+                        <div class="progress-bar-fill" id="assembly-bar" style="width: 0%; background: linear-gradient(90deg, var(--neon-gold), var(--neon-orange));"></div>
+                    </div>
+                    <p style="margin-top: 10px; font-family: var(--font-mono);"><span id="parts-count">0</span>/5 أجزاء</p>
+                </div>
+            </div>
+
+            <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin-top: 20px;">
+                <h4 style="color: var(--neon-green); margin-bottom: 10px;">🔧 مهمة التجميع:</h4>
+                <p>اكتب دالة Python تجمع كل الأجزاء في أداة واحدة:</p>
+                <textarea class="function-input" id="assembly-code" rows="5" style="resize: vertical; margin-top: 10px;" placeholder="def build_tool():&#10;    parts = ['Terminal', 'Crypto', 'Firewall', 'Scanner', 'Function']&#10;    # اكتب الكود...&#10;    return 'Exploit Dragon Ready!'">def build_tool():
+    parts = ['Terminal', 'Crypto', 'Firewall', 'Scanner', 'Function']
+    # اكتب الكود...
+    return 'Exploit Dragon Ready!'</textarea>
+                <button class="cyber-btn primary" id="run-assembly">⚔️ تجميع الأداة</button>
+                <div class="code-output" id="assembly-output" style="margin-top: 10px;"></div>
+            </div>
+
+            <div id="assembly-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 4rem; margin-bottom: 10px;">🐉</div>
+                <h3 style="color: var(--neon-gold);">تنين الاستغلال جاهز!</h3>
+                <button class="cyber-btn primary" id="go-to-ctf">الانتقال للتحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي Functions المتقدم</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 5, () => {
+                CE.agentSpeak('correct', '🔧 الدوال هي أساس البرمجة المتقدمة!');
+            });
+
+            // Update tool assembly based on collected parts
+            const collected = CE.state.toolsCollected;
+            let partsCount = 0;
+            document.querySelectorAll('.tool-part').forEach(part => {
+                const partNum = parseInt(part.dataset.part);
+                const toolId = ['terminal_shard', 'crypto_wheel', 'firewall_core', 'port_scanner', 'function_blade'][partNum - 1];
+                if (collected.includes(toolId)) {
+                    part.classList.add('collected');
+                    partsCount++;
+                }
+            });
+
+            document.getElementById('parts-count').textContent = partsCount;
+            document.getElementById('assembly-bar').style.width = (partsCount / 5 * 100) + '%';
+
+            // Function demo
+            document.getElementById('run-function').addEventListener('click', () => {
+                const name = document.getElementById('func-name').value;
+                const param = document.getElementById('func-param').value;
+                const body = document.getElementById('func-body').value;
+                const call = document.getElementById('func-call').value;
+                const output = document.getElementById('func-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+
+                    const code = `function ${name}(${param}) { ${body}; }\nconsole.log(${call});`;
+                    eval(code);
+
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">✅ النتيجة: ${result}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct', '🔥 دالة ممتازة!');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ خطأ: ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            // Assembly
+            document.getElementById('run-assembly').addEventListener('click', () => {
+                const code = document.getElementById('assembly-code').value;
+                const output = document.getElementById('assembly-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+
+                    const funcCode = code + '\nconsole.log(build_tool());';
+                    eval(funcCode);
+
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">📤 ${result}</span>`;
+
+                    if (result.toLowerCase().includes('dragon') || result.toLowerCase().includes('ready') || result.toLowerCase().includes('exploit')) {
+                        document.getElementById('assembly-complete').style.display = 'block';
+                        CE.audio.levelUp();
+                        CE.agentSpeak('correct', '🐉 تنين الاستغلال جاهز للمعركة!');
+                        CE.addXP(100, 'Tool Assembled');
+                    }
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ خطأ: ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                initQuiz();
+            });
+
+            // Quiz
+            const questions = [
+                { q: 'كيف نعرف دالة في Python؟', options: ['func', 'def', 'function', 'define'], correct: 1 },
+                { q: 'return في الدالة تعني:', options: ['طباعة', 'إرجاع قيمة', 'إنهاء البرنامج', 'تكرار'], correct: 1 },
+                { q: 'أي من التالي يُعتبر معاملاً (parameter)؟', options: ['def', 'return', 'name في def greet(name)', 'print'], correct: 2 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() { currentQ = 0; score = 0; showQuestion(); }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(5, 100 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 5, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: الدالة تُعرف بـ def وتُرجع بـ return!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

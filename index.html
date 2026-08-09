@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - بوابة المخترقين</title>
+    <link rel="stylesheet" href="css/cyber-theme.css">
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <!-- HEADER -->
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="CYBER RPG">CYBER RPG</h1>
+            <p class="cyber-subtitle">تعلم البرمجة والاختراق الأخلاقي بأسلوب اللعبة</p>
+        </header>
+
+        <!-- HUD -->
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item">
+                <div class="hud-label">المستوى</div>
+                <div class="hud-value" id="hud-level">1</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">الرتبة</div>
+                <div class="hud-value" id="hud-rank" style="color: #00ff41">👶 Script Kiddie</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">النقاط</div>
+                <div class="hud-value" id="hud-xp">0</div>
+            </div>
+            <div class="hud-item">
+                <div class="hud-label">الشرارة</div>
+                <div class="hud-value" id="hud-streak" style="display:none">🔥 0</div>
+            </div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg">
+                    <div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div>
+                </div>
+            </div>
+            <div class="hud-tools-container" id="hud-tools">
+                <span class="tool-icon locked" title="شظية التيرمنال">🔒</span>
+                <span class="tool-icon locked" title="عجلة التشفير">🔒</span>
+                <span class="tool-icon locked" title="نواة الجدار الناري">🔒</span>
+                <span class="tool-icon locked" title="ماسح المنافذ">🔒</span>
+                <span class="tool-icon locked" title="شفرة الدالة">🔒</span>
+                <span class="tool-icon locked" title="تنين الاستغلال">🔒</span>
+            </div>
+        </div>
+
+        <!-- DAILY REWARD -->
+        <div class="cyber-section" id="daily-reward-section" style="display:none">
+            <h2>🎁 مكافأة يومية!</h2>
+            <p>لقد عدت للعب اليوم! اضغط للحصول على مكافأتك.</p>
+            <button class="cyber-btn primary" id="claim-daily">استلام المكافأة</button>
+        </div>
+
+        <!-- LEVEL MAP -->
+        <div class="level-map" id="level-map">
+            <div class="level-path"></div>
+
+            <!-- Level 1 -->
+            <div class="level-node">
+                <a href="levels/level1.html" class="level-card available" data-level="1">
+                    <div class="level-status" id="status-1"></div>
+                    <div class="level-number">1</div>
+                    <h3 class="level-title">🔓 Terminal Basics</h3>
+                    <p class="level-desc">تعلم أوامر Linux الأساسية: pwd, ls, cd, cat</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Linux</span>
+                        <span class="level-tag">Terminal</span>
+                        <span class="level-tag">مبتدئ</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 2 -->
+            <div class="level-node">
+                <a href="levels/level2.html" class="level-card locked" data-level="2">
+                    <div class="level-status" id="status-2"></div>
+                    <div class="level-number">2</div>
+                    <h3 class="level-title">📊 Python Variables + Caesar Cipher</h3>
+                    <p class="level-desc">المتغيرات، أنواع البيانات، وفك شفرة قيصر</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">Cryptography</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 3 -->
+            <div class="level-node">
+                <a href="levels/level3.html" class="level-card locked" data-level="3">
+                    <div class="level-status" id="status-3"></div>
+                    <div class="level-number">3</div>
+                    <h3 class="level-title">🛡️ If/Else/Elif + Firewall Grid</h3>
+                    <p class="level-desc">الشروط المنطقية وتجاوز جدار الحماية</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">Logic</span>
+                        <span class="level-tag">Firewall</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 4 -->
+            <div class="level-node">
+                <a href="levels/level4.html" class="level-card locked" data-level="4">
+                    <div class="level-status" id="status-4"></div>
+                    <div class="level-number">4</div>
+                    <h3 class="level-title">🔄 For/While Loops + Port Scanner</h3>
+                    <p class="level-desc">الحلقات التكرارية وفحص المنافذ</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">Loops</span>
+                        <span class="level-tag">Networking</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 5 -->
+            <div class="level-node">
+                <a href="levels/level5.html" class="level-card locked" data-level="5">
+                    <div class="level-status" id="status-5"></div>
+                    <div class="level-number">5</div>
+                    <h3 class="level-title">🔧 Functions + Tool Assembly</h3>
+                    <p class="level-desc">الدوال البرمجية وتجميع أدوات الاختراق</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">Functions</span>
+                        <span class="level-tag">Tools</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 6 -->
+            <div class="level-node">
+                <a href="levels/level6.html" class="level-card locked" data-level="6">
+                    <div class="level-status" id="status-6"></div>
+                    <div class="level-number">6</div>
+                    <h3 class="level-title">🐉 Boss Fight: PHANTOM</h3>
+                    <p class="level-desc">المعركة النهائية - استخدم كل ما تعلمته!</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Boss</span>
+                        <span class="level-tag">Final</span>
+                        <span class="level-tag">Expert</span>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+            <!-- Level 7 -->
+            <div class="level-node">
+                <a href="levels/level7.html" class="level-card locked" data-level="7">
+                    <div class="level-status" id="status-7">🔒</div>
+                    <div class="level-number">7</div>
+                    <h3 class="level-title">📦 Lists & Dictionaries</h3>
+                    <p class="level-desc">قوائم Python وقواميس البيانات</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">Data</span>
+                        <span class="level-tag">Advanced</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 8 -->
+            <div class="level-node">
+                <a href="levels/level8.html" class="level-card locked" data-level="8">
+                    <div class="level-status" id="status-8">🔒</div>
+                    <div class="level-number">8</div>
+                    <h3 class="level-title">📁 File Handling + Heist</h3>
+                    <p class="level-desc">قراءة وكتابة الملفات + عملية سرقة بيانات</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">Files</span>
+                        <span class="level-tag">Advanced</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 9 -->
+            <div class="level-node">
+                <a href="levels/level9.html" class="level-card locked" data-level="9">
+                    <div class="level-status" id="status-9">🔒</div>
+                    <div class="level-number">9</div>
+                    <h3 class="level-title">👁️ Regex + Hawk Eye</h3>
+                    <p class="level-desc">النماذج المنتظمة + لعبة البحث عن الأنماط</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">Regex</span>
+                        <span class="level-tag">Expert</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 10 -->
+            <div class="level-node">
+                <a href="levels/level10.html" class="level-card locked" data-level="10">
+                    <div class="level-status" id="status-10">🔒</div>
+                    <div class="level-number">10</div>
+                    <h3 class="level-title">🌐 APIs & JSON + Server Hack</h3>
+                    <p class="level-desc">طلبات HTTP ومعالجة JSON + اختراق خوادم</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">API</span>
+                        <span class="level-tag">JSON</span>
+                        <span class="level-tag">Expert</span>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Level 11 -->
+            <div class="level-node">
+                <a href="levels/level11.html" class="level-card locked" data-level="11">
+                    <div class="level-status" id="status-11">🔒</div>
+                    <div class="level-number">11</div>
+                    <h3 class="level-title">🕷️ Web Scraping + Info Gathering</h3>
+                    <p class="level-desc">استخراج بيانات المواقع وجمع المعلومات</p>
+                    <div class="level-tags">
+                        <span class="level-tag">Python</span>
+                        <span class="level-tag">Scraping</span>
+                        <span class="level-tag">HTML</span>
+                        <span class="level-tag">Expert</span>
+                    </div>
+                </a>
+            </div>
+
+        <!-- TOOL COMPLETION -->
+        <div class="cyber-section" id="tool-completion" style="display:none">
+            <h2>⚔️ السلاح النهائي مكتمل!</h2>
+            <p>لقد جمعت جميع الأجزاء الستة! تنين الاستغلال جاهز للاستخدام.</p>
+            <div style="font-size: 4rem; text-align: center; margin: 20px 0;">🐉</div>
+            <p style="text-align: center; color: var(--neon-gold);">أنت الآن Cyber Legend حقيقي!</p>
+        </div>
+
+        <!-- FOOTER -->
+        <footer style="text-align: center; padding: 30px; color: rgba(255,255,255,0.3); font-family: var(--font-mono); font-size: 0.8rem;">
+            <p>CYBER RPG v3.0 | تعمل بدون إنترنت | Termux Ready</p>
+            <p style="margin-top: 5px;">Built with 💚 for future hackers</p>
+        </footer>
+    </div>
+
+    <!-- AGENT ZERO -->
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+
+            // Update level cards based on progress
+            function updateLevelMap() {
+                const completed = CE.state.completedLevels;
+                const currentLevel = CE.state.level;
+
+                document.querySelectorAll('.level-card').forEach(card => {
+                    const levelNum = parseInt(card.dataset.level);
+                    const statusEl = document.getElementById(`status-${levelNum}`);
+
+                    card.classList.remove('available', 'completed', 'locked');
+
+                    if (completed.includes(levelNum)) {
+                        card.classList.add('completed');
+                        if (statusEl) statusEl.textContent = '✅';
+                    } else if (levelNum <= currentLevel) {
+                        card.classList.add('available');
+                        if (statusEl) statusEl.textContent = '🔓';
+                    } else {
+                        card.classList.add('locked');
+                        if (statusEl) statusEl.textContent = '🔒';
+                        card.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            CE.agentSpeak('wrong', '🔒 هذا المستوى مقفل! أكمل المستويات السابقة أولاً.');
+                            CE.audio.fail();
+                        });
+                    }
+                });
+
+                // Show tool completion
+                if (CE.isToolComplete()) {
+                    document.getElementById('tool-completion').style.display = 'block';
+                }
+            }
+
+            // Daily reward
+            if (CE.checkDailyReward()) {
+                const section = document.getElementById('daily-reward-section');
+                section.style.display = 'block';
+                document.getElementById('claim-daily').addEventListener('click', () => {
+                    const reward = CE.claimDailyReward();
+                    CE.agentSpeak('correct', `🎉 حصلت على ${reward} نقطة XP كمكافأة يومية!`);
+                    section.style.display = 'none';
+                    CE.audio.success();
+                });
+            }
+
+            // Agent Zero welcome
+            setTimeout(() => {
+                if (CE.state.completedLevels.length === 0) {
+                    CE.agentSpeak('correct', '👋 مرحباً Agent! اضغط على المستوى الأول لبدء المغامرة!');
+                } else {
+                    CE.agentSpeak('correct', `🔥 عدت مرة أخرى! شرارتك: ${CE.state.streak} أيام!`);
+                }
+            }, 1000);
+
+            // Agent click
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                const tips = [
+                    '💡 تلميح: استخدم وضع EXPERT للتحدي الحقيقي!',
+                    '🔥 كل يوم تلعب فيه يزيد شرارتك ونقاطك!',
+                    '🎯 اجمع جميع الأجزاء الستة لبناء السلاح النهائي!',
+                    '⚡ الأخطاء جزء من التعلم، لا تستسلم!',
+                    '🐉 PHANTOM ينتظرك في المستوى الأخير...'
+                ];
+                CE.agentSpeak('hint', tips[Math.floor(Math.random() * tips.length)]);
+                CE.audio.click();
+            });
+
+            updateLevelMap();
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 6: BOSS FIGHT</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .boss-arena {
+            background: linear-gradient(180deg, rgba(255,0,0,0.08), rgba(0,0,0,0.9));
+            border: 2px solid var(--neon-red);
+            border-radius: 16px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .boss-avatar {
+            text-align: center;
+            font-size: 6rem;
+            margin: 20px 0;
+            animation: bossFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 30px var(--neon-red));
+        }
+        @keyframes bossFloat {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); }
+        }
+        .boss-name {
+            text-align: center;
+            font-family: var(--font-display);
+            font-size: 2rem;
+            color: var(--neon-red);
+            text-shadow: 0 0 20px var(--neon-red);
+            margin-bottom: 20px;
+        }
+        .phase-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 0 20px;
+        }
+        .phase-step {
+            text-align: center;
+            opacity: 0.3;
+            transition: all 0.5s;
+        }
+        .phase-step.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .phase-step.completed {
+            opacity: 1;
+            color: var(--neon-green);
+        }
+        .phase-icon {
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .phase-label {
+            font-family: var(--font-mono);
+            font-size: 0.8rem;
+        }
+        .challenge-area {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(255,0,0,0.3);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            min-height: 200px;
+        }
+        .terminal-challenge {
+            background: #0a0a0f;
+            border: 1px solid var(--neon-red);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            direction: ltr;
+            text-align: left;
+            margin: 15px 0;
+        }
+        .damage-effect {
+            animation: damageShake 0.5s;
+        }
+        @keyframes damageShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-10px); }
+            40% { transform: translateX(10px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+        .victory-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            animation: victoryIn 1s;
+        }
+        @keyframes victoryIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .victory-title {
+            font-family: var(--font-display);
+            font-size: 3rem;
+            color: var(--neon-gold);
+            text-shadow: 0 0 30px var(--neon-gold);
+            margin-bottom: 20px;
+        }
+        .victory-stats {
+            background: var(--panel-bg);
+            border: 1px solid var(--neon-gold);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="BOSS FIGHT">BOSS FIGHT</h1>
+            <p class="cyber-subtitle">🐉 المواجهة النهائية مع PHANTOM</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- BOSS ARENA -->
+        <div class="boss-arena" id="boss-arena">
+            <div class="boss-name">👁️ PHANTOM - المدير المجهول</div>
+            <div class="boss-avatar" id="boss-avatar">🐉</div>
+
+            <!-- HP BAR -->
+            <div class="boss-hp-container">
+                <div class="boss-hp-bar-bg">
+                    <div class="boss-hp-bar" id="boss-hp" style="width: 100%"></div>
+                </div>
+                <div class="boss-hp-text" id="boss-hp-text">HP: 100%</div>
+            </div>
+
+            <!-- PHASES -->
+            <div class="phase-indicator" id="phase-indicator">
+                <div class="phase-step active" data-phase="1">
+                    <span class="phase-icon">🔍</span>
+                    <span class="phase-label">Recon</span>
+                </div>
+                <div class="phase-step" data-phase="2">
+                    <span class="phase-icon">🎯</span>
+                    <span class="phase-label">Vuln</span>
+                </div>
+                <div class="phase-step" data-phase="3">
+                    <span class="phase-icon">⚔️</span>
+                    <span class="phase-label">Exploit</span>
+                </div>
+                <div class="phase-step" data-phase="4">
+                    <span class="phase-icon">🔒</span>
+                    <span class="phase-label">Patch</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHALLENGE AREA -->
+        <div class="challenge-area" id="challenge-area">
+            <h3 style="color: var(--neon-red); margin-bottom: 15px;" id="phase-title">المرحلة 1: الاستطلاع (Reconnaissance)</h3>
+            <p id="phase-desc">PHANTOM يخفي خادمه. استخدم nmap لاكتشاف المنافذ المفتوحة!</p>
+
+            <div id="phase-content">
+                <!-- Dynamic content injected here -->
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 التحدي النهائي</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">هزمت PHANTOM!</h3>
+                <button class="cyber-btn primary" id="complete-game">إنهاء اللعبة والفوز 🎉</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 6, () => {
+                CE.agentSpeak('correct', '🐉 PHANTOM قوي! استخدم كل ما تعلمته!');
+                loadPhase(1);
+            });
+
+            let currentPhase = 1;
+            let bossHP = 100;
+
+            const phases = {
+                1: {
+                    title: 'المرحلة 1: الاستطلاع (Reconnaissance)',
+                    desc: 'PHANTOM يخفي خادمه. اكتشف المنافذ المفتوحة!',
+                    content: `
+                        <div class="terminal-challenge">
+                            <p style="color: var(--neon-blue);">root@kali:~# nmap -sV 192.168.1.100</p>
+                            <p style="color: var(--neon-green); margin-top: 10px;">PORT     STATE    SERVICE</p>
+                            <p>22/tcp   open     ssh</p>
+                            <p>80/tcp   open     http</p>
+                            <p>3306/tcp closed   mysql</p>
+                            <p>8080/tcp open     http-proxy</p>
+                            <p style="color: var(--neon-red); margin-top: 10px;">❓ أي منفذ يحتمل وجود ثغرة ويب؟</p>
+                        </div>
+                        <div class="quiz-options" style="margin-top: 15px;">
+                            <div class="quiz-option" data-answer="22">A. 22 (SSH)</div>
+                            <div class="quiz-option" data-answer="80">B. 80 (HTTP)</div>
+                            <div class="quiz-option" data-answer="3306">C. 3306 (MySQL)</div>
+                            <div class="quiz-option" data-answer="8080">D. 8080 (Proxy)</div>
+                        </div>
+                    `,
+                    correct: '80',
+                    damage: 25
+                },
+                2: {
+                    title: 'المرحلة 2: اكتشاف الثغرة (Vulnerability)',
+                    desc: 'وجدت خادم ويب! الآن ابحث عن الثغرة!',
+                    content: `
+                        <div class="terminal-challenge">
+                            <p style="color: var(--neon-blue);">root@kali:~# dirb http://192.168.1.100</p>
+                            <p style="color: var(--neon-green); margin-top: 10px;">==> DIRECTORY: http://192.168.1.100/admin/</p>
+                            <p>==> DIRECTORY: http://192.168.1.100/login.php</p>
+                            <p>==> DIRECTORY: http://192.168.1.100/config.bak</p>
+                            <p style="color: var(--neon-red); margin-top: 10px;">❓ أي ملف قد يحتوي على معلومات حساسة؟</p>
+                        </div>
+                        <div class="quiz-options" style="margin-top: 15px;">
+                            <div class="quiz-option" data-answer="admin">A. /admin/</div>
+                            <div class="quiz-option" data-answer="login">B. /login.php</div>
+                            <div class="quiz-option" data-answer="config">C. /config.bak</div>
+                            <div class="quiz-option" data-answer="none">D. لا شيء</div>
+                        </div>
+                    `,
+                    correct: 'config',
+                    damage: 25
+                },
+                3: {
+                    title: 'المرحلة 3: الاستغلال (Exploitation)',
+                    desc: 'وجدت ملف الإعدادات! استخدم Python لاستغلاله!',
+                    content: `
+                        <div style="background: #1e1e1e; padding: 20px; border-radius: 8px; margin: 15px 0; border: 1px solid var(--neon-red); direction: ltr; text-align: left;">
+                            <p style="color: #6a9955;"># config.bak يحتوي على:</p>
+                            <p style="color: #ce9178;">DB_USER=admin</p>
+                            <p style="color: #ce9178;">DB_PASS=phantom123</p>
+                            <p style="color: #ce9178;">DB_NAME=secret_db</p>
+                        </div>
+                        <p style="color: var(--neon-red); margin: 15px 0;">❓ اكتب أمر SQL لقراءة جميع المستخدمين:</p>
+                        <input type="text" class="cyber-input" id="sql-input" placeholder="SELECT ..." style="direction: ltr; text-align: left; margin-bottom: 10px;">
+                        <button class="cyber-btn primary" id="submit-sql">⚔️ تنفيذ</button>
+                        <div class="code-output" id="sql-output" style="margin-top: 10px;"></div>
+                    `,
+                    correct: 'select * from users',
+                    damage: 25,
+                    isInput: true
+                },
+                4: {
+                    title: 'المرحلة 4: التصحيح (Patch)',
+                    desc: 'أخيراً! أصلح الثغرة لمنع PHANTOM من العودة!',
+                    content: `
+                        <div style="background: #1e1e1e; padding: 20px; border-radius: 8px; margin: 15px 0; border: 1px solid var(--neon-green); direction: ltr; text-align: left;">
+                            <p style="color: #6a9955;"># كود PHP ضعيف في login.php:</p>
+                            <p style="color: #ce9178;">$query = "SELECT * FROM users WHERE user='$username' AND pass='$password'";</p>
+                        </div>
+                        <p style="color: var(--neon-red); margin: 15px 0;">❓ ما هو نوع الثغرة وكيف تُصلحها؟</p>
+                        <div class="quiz-options" style="margin-top: 15px;">
+                            <div class="quiz-option" data-answer="xss">A. XSS - استخدم htmlspecialchars()</div>
+                            <div class="quiz-option" data-answer="sqli">B. SQL Injection - استخدم Prepared Statements</div>
+                            <div class="quiz-option" data-answer="csrf">C. CSRF - أضف توكن</div>
+                            <div class="quiz-option" data-answer="rce">D. RCE - حدد الأوامر</div>
+                        </div>
+                    `,
+                    correct: 'sqli',
+                    damage: 25
+                }
+            };
+
+            function loadPhase(phaseNum) {
+                currentPhase = phaseNum;
+                const phase = phases[phaseNum];
+
+                document.getElementById('phase-title').textContent = phase.title;
+                document.getElementById('phase-desc').textContent = phase.desc;
+                document.getElementById('phase-content').innerHTML = phase.content;
+
+                // Update phase indicator
+                document.querySelectorAll('.phase-step').forEach(step => {
+                    const sp = parseInt(step.dataset.phase);
+                    step.classList.remove('active', 'completed');
+                    if (sp < phaseNum) step.classList.add('completed');
+                    else if (sp === phaseNum) step.classList.add('active');
+                });
+
+                // Setup interactions
+                if (phase.isInput) {
+                    document.getElementById('submit-sql').addEventListener('click', () => {
+                        const val = document.getElementById('sql-input').value.toLowerCase().trim();
+                        const output = document.getElementById('sql-output');
+
+                        if (val.includes('select') && val.includes('from') && val.includes('users')) {
+                            output.innerHTML = '<span style="color: #00ff41;">✅ نجح! تم استخراج البيانات!</span>';
+                            CE.audio.hack();
+                            CE.agentSpeak('correct', '💀 بيانات PHANTOM مسربة!');
+                            damageBoss(phase.damage);
+                        } else {
+                            output.innerHTML = '<span style="color: #ff3333;">❌ استعلام خاطئ!</span>';
+                            CE.audio.fail();
+                            CE.agentSpeak('wrong', '💥 فشل الاستغلال! جرب مرة أخرى!');
+                            CE.state.currentSession.mistakes++;
+                        }
+                    });
+                } else {
+                    document.querySelectorAll('#phase-content .quiz-option').forEach(opt => {
+                        opt.addEventListener('click', function() {
+                            const ans = this.dataset.answer;
+                            if (ans === phase.correct) {
+                                this.classList.add('correct');
+                                CE.audio.hack();
+                                CE.agentSpeak('correct', '💀 ضربة قوية لـ PHANTOM!');
+                                damageBoss(phase.damage);
+                            } else {
+                                this.classList.add('wrong');
+                                CE.audio.fail();
+                                CE.agentSpeak('wrong', '🛡️ PHANTOM صد الهجوم! حاول مرة أخرى!');
+                                CE.state.currentSession.mistakes++;
+                            }
+                        });
+                    });
+                }
+            }
+
+            function damageBoss(damage) {
+                bossHP -= damage;
+                if (bossHP < 0) bossHP = 0;
+
+                const hpBar = document.getElementById('boss-hp');
+                const hpText = document.getElementById('boss-hp-text');
+                const bossAvatar = document.getElementById('boss-avatar');
+
+                hpBar.style.width = bossHP + '%';
+                hpText.textContent = 'HP: ' + bossHP + '%';
+
+                bossAvatar.classList.add('damage-effect');
+                setTimeout(() => bossAvatar.classList.remove('damage-effect'), 500);
+
+                if (bossHP <= 0) {
+                    setTimeout(() => {
+                        bossAvatar.textContent = '💀';
+                        CE.agentSpeak('correct', '🎉 PHANTOM مهزوم! لقد فزت!');
+                        document.getElementById('ctf-section').style.display = 'block';
+                        document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                        initFinalQuiz();
+                    }, 1000);
+                } else {
+                    setTimeout(() => {
+                        if (currentPhase < 4) {
+                            loadPhase(currentPhase + 1);
+                        }
+                    }, 1500);
+                }
+            }
+
+            // Final Quiz
+            function initFinalQuiz() {
+                const questions = [
+                    { q: 'ما هو أول مرحلة في اختبار الاختراق؟', options: ['Exploitation', 'Reconnaissance', 'Patching', 'Reporting'], correct: 1 },
+                    { q: 'أي منفذ شائع لـ SSH؟', options: ['21', '22', '80', '443'], correct: 1 },
+                    { q: 'كيف تمنع SQL Injection؟', options: ['MD5 Hash', 'Prepared Statements', 'Base64', 'XSS Filter'], correct: 1 },
+                    { q: 'ما هو nmap؟', options: ['متصفح', 'ماسح منافذ', 'محرر نصوص', 'قاعدة بيانات'], correct: 1 }
+                ];
+
+                let currentQ = 0, score = 0;
+
+                function showQuestion() {
+                    if (currentQ >= questions.length) {
+                        document.getElementById('quiz-container').innerHTML = 
+                            `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة النهائية: ${score}/${questions.length}</h3></div>`;
+                        document.getElementById('ctf-result').style.display = 'block';
+                        return;
+                    }
+                    const q = questions[currentQ];
+                    let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                    q.options.forEach((opt, i) => {
+                        html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                    });
+                    html += '</div>';
+                    document.getElementById('quiz-container').innerHTML = html;
+                    document.querySelectorAll('.quiz-option').forEach(opt => {
+                        opt.addEventListener('click', function() {
+                            const idx = parseInt(this.dataset.index);
+                            if (idx === q.correct) {
+                                this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                            } else {
+                                this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                            }
+                            setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                        });
+                    });
+                }
+                showQuestion();
+            }
+
+            document.getElementById('complete-game').addEventListener('click', () => {
+                const bonus = 500;
+                CE.completeLevel(6, bonus);
+                CE.endSession(true);
+
+                // Victory overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'victory-overlay';
+                overlay.innerHTML = `
+                    <div class="victory-title">🏆 VICTORY!</div>
+                    <div class="victory-stats">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">👑</div>
+                        <h2 style="color: var(--neon-gold); margin-bottom: 15px;">أصبحت Cyber Legend!</h2>
+                        <p style="color: var(--neon-green); font-size: 1.2rem;">+${bonus} XP</p>
+                        <p style="margin-top: 15px; color: rgba(255,255,255,0.7);">لكن انتظر... رسالة مشفرة جديدة تصل...</p>
+                        <p style="color: var(--neon-red); margin-top: 10px; font-family: var(--font-mono);">"PHANTOM كان مجرد عميل... المدير الحقيقي قادم."</p>
+                        <button class="cyber-btn primary" style="margin-top: 20px;" onclick="window.location.href='../index.html'">العودة للبوابة ➡️</button>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                CE.audio.levelUp();
+                CE.playStory('cliffhanger', 6);
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: Recon أولاً، ثم Vuln، ثم Exploit، ثم Patch!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

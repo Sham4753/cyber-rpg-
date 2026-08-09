@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 4: Loops + Port Scanner</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .loop-visualizer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            min-height: 80px;
+            align-items: center;
+            justify-content: center;
+        }
+        .loop-item {
+            width: 50px;
+            height: 50px;
+            border: 2px solid var(--neon-green);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-weight: bold;
+            transition: all 0.3s;
+            opacity: 0;
+            transform: scale(0);
+        }
+        .loop-item.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .loop-item.highlight {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--neon-green);
+        }
+        .port-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            max-width: 500px;
+            margin: 20px auto;
+        }
+        .port-cell {
+            aspect-ratio: 1;
+            border: 1px solid var(--neon-blue);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-size: 0.7rem;
+            transition: all 0.3s;
+            background: rgba(0,0,0,0.5);
+        }
+        .port-cell.open {
+            background: rgba(0, 255, 65, 0.3);
+            border-color: var(--neon-green);
+            box-shadow: 0 0 10px var(--neon-green);
+            animation: portOpen 0.5s;
+        }
+        .port-cell.closed {
+            background: rgba(255, 51, 51, 0.1);
+            border-color: #333;
+            opacity: 0.5;
+        }
+        @keyframes portOpen {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 4">LEVEL 4</h1>
+            <p class="cyber-subtitle">🔄 For/While Loops + Port Scanner</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- LESSON: Loops -->
+        <div class="cyber-section fade-in-up">
+            <h2>📚 الدرس: الحلقات التكرارية</h2>
+            <p>الحلقات تسمح لك بتكرار كود <strong>عدة مرات</strong> بدون كتابته مرة أخرى!</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px;">
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 20px; border: 1px solid var(--neon-green); direction: ltr; text-align: left;">
+                    <h4 style="color: var(--neon-green); margin-bottom: 10px;">🔁 For Loop</h4>
+                    <pre style="font-family: var(--font-mono); color: #d4d4d4; line-height: 1.8;">for i in range(5):
+    print(i)</pre>
+                    <p style="color: rgba(255,255,255,0.6); margin-top: 10px; direction: rtl; text-align: right;">يطبع: 0, 1, 2, 3, 4</p>
+                </div>
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 20px; border: 1px solid var(--neon-blue); direction: ltr; text-align: left;">
+                    <h4 style="color: var(--neon-blue); margin-bottom: 10px;">🔂 While Loop</h4>
+                    <pre style="font-family: var(--font-mono); color: #d4d4d4; line-height: 1.8;">count = 0
+while count < 5:
+    print(count)
+    count += 1</pre>
+                    <p style="color: rgba(255,255,255,0.6); margin-top: 10px; direction: rtl; text-align: right;">يطبع: 0, 1, 2, 3, 4</p>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <h4 style="color: var(--neon-gold);">🎮 جرب بنفسك:</h4>
+                <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+                    <label>نوع الحلقة:</label>
+                    <select id="loop-type" style="background: #1e1e1e; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 8px; border-radius: 4px;">
+                        <option value="for">for i in range(</option>
+                        <option value="while">while count < </option>
+                    </select>
+                    <input type="number" id="loop-count" value="5" min="1" max="10" style="width: 60px; background: #1e1e1e; border: 1px solid var(--neon-green); color: var(--neon-green); padding: 8px; border-radius: 4px; text-align: center;">
+                    <span>)</span>
+                    <button class="cyber-btn" id="run-loop">▶️ تشغيل</button>
+                </div>
+                <div class="loop-visualizer" id="loop-visualizer"></div>
+            </div>
+        </div>
+
+        <!-- PORT SCANNER -->
+        <div class="cyber-section fade-in-up">
+            <h2>🔍 محاكاة nmap: فحص المنافذ</h2>
+            <p>المخترقون يستخدمون أدوات لفحص المنافذ المفتوحة على الخوادم. جرب المحاكاة:</p>
+
+            <div style="text-align: center; margin: 20px 0;">
+                <p style="color: var(--neon-blue); font-family: var(--font-mono);">الهدف: 192.168.1.1</p>
+                <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-top: 5px;">ابحث عن المنفذ المفتوح (يومض بالأخضر)</p>
+            </div>
+
+            <div class="port-grid" id="port-grid"></div>
+
+            <div style="text-align: center; margin-top: 15px;">
+                <button class="cyber-btn primary" id="start-scan">🔍 بدء الفحص</button>
+                <button class="cyber-btn" id="hint-port">💡 تلميح</button>
+            </div>
+
+            <div id="port-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">وجدت المنفذ المفتوح!</h3>
+                <p style="color: var(--neon-gold); font-family: var(--font-mono); margin-top: 10px;">Port 31337 OPEN</p>
+                <button class="cyber-btn primary" id="go-to-ctf">الانتقال للتحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي Loops المتقدم</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 4, () => {
+                CE.agentSpeak('correct', '🔄 الحلقات هي قوة Python! جرب المحاكاة!');
+            });
+
+            // Loop visualizer
+            document.getElementById('run-loop').addEventListener('click', () => {
+                const type = document.getElementById('loop-type').value;
+                const count = parseInt(document.getElementById('loop-count').value);
+                const viz = document.getElementById('loop-visualizer');
+                viz.innerHTML = '';
+
+                for (let i = 0; i < count; i++) {
+                    const item = document.createElement('div');
+                    item.className = 'loop-item';
+                    item.textContent = i;
+                    viz.appendChild(item);
+
+                    setTimeout(() => {
+                        item.classList.add('show');
+                        CE.audio.click();
+                        setTimeout(() => item.classList.add('highlight'), 200);
+                        setTimeout(() => item.classList.remove('highlight'), 400);
+                    }, i * 300);
+                }
+
+                CE.agentSpeak('correct', `🔥 رائع! شاهدت ${count} تكرارات!`);
+            });
+
+            // Port Scanner
+            const ports = [21, 22, 23, 25, 53, 80, 110, 143, 443, 3306, 3389, 5432, 8080, 8443, 9000, 31337, 22, 80, 443, 8080, 22, 80, 443, 3306];
+            const openPort = 31337;
+            let scanning = false;
+
+            function initPortGrid() {
+                const grid = document.getElementById('port-grid');
+                grid.innerHTML = '';
+                ports.forEach((port, i) => {
+                    const cell = document.createElement('div');
+                    cell.className = 'port-cell';
+                    cell.textContent = port;
+                    cell.dataset.port = port;
+                    cell.dataset.index = i;
+                    grid.appendChild(cell);
+                });
+            }
+
+            document.getElementById('start-scan').addEventListener('click', () => {
+                if (scanning) return;
+                scanning = true;
+                initPortGrid();
+
+                const cells = document.querySelectorAll('.port-cell');
+                let found = false;
+
+                cells.forEach((cell, i) => {
+                    setTimeout(() => {
+                        if (found) return;
+
+                        const port = parseInt(cell.dataset.port);
+                        cell.style.borderColor = 'var(--neon-blue)';
+
+                        setTimeout(() => {
+                            if (port === openPort) {
+                                cell.classList.add('open');
+                                cell.textContent = port + ' ✓';
+                                found = true;
+                                CE.audio.hack();
+                                CE.agentSpeak('correct', `🔓 وجدته! المنفذ ${port} مفتوح!`);
+                                document.getElementById('port-result').style.display = 'block';
+                                CE.addXP(100, 'Port Found');
+                                scanning = false;
+                            } else {
+                                cell.classList.add('closed');
+                            }
+                        }, 200);
+
+                        CE.audio.click();
+                    }, i * 150);
+                });
+            });
+
+            document.getElementById('hint-port').addEventListener('click', () => {
+                CE.showSmartHint('ابحث عن رقم غير معتاد... 31337!', 'port-grid');
+            });
+
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                initQuiz();
+            });
+
+            initPortGrid();
+
+            // Quiz
+            const questions = [
+                { q: 'كم مرة يتكرر: for i in range(3)؟', options: ['2', '3', '4', '5'], correct: 1 },
+                { q: 'While Loop تستمر طالما أن الشرط:', options: ['خطأ', 'صحيح', 'null', 'undefined'], correct: 1 },
+                { q: 'أي منفذ شائع لـ HTTP؟', options: ['21', '22', '80', '3306'], correct: 2 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() { currentQ = 0; score = 0; showQuestion(); }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(4, 100 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 4, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: range(5) تعطي 0,1,2,3,4!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>

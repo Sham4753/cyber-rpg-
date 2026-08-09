@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 10: APIs & JSON</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .api-simulator {
+            background: #0a0a0f;
+            border: 2px solid var(--neon-blue);
+            border-radius: 12px;
+            padding: 25px;
+            margin: 20px 0;
+            position: relative;
+        }
+        .api-simulator::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--neon-blue), var(--neon-green));
+        }
+        .http-request {
+            background: #1e1e1e;
+            border: 1px solid var(--neon-green);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: var(--font-mono);
+            direction: ltr;
+            text-align: left;
+            margin: 10px 0;
+        }
+        .http-method {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            margin-right: 8px;
+        }
+        .method-get { background: rgba(0, 255, 65, 0.2); color: var(--neon-green); border: 1px solid var(--neon-green); }
+        .method-post { background: rgba(0, 212, 255, 0.2); color: var(--neon-blue); border: 1px solid var(--neon-blue); }
+        .http-url { color: #d4d4d4; }
+        .json-response {
+            background: #0d0d0d;
+            border: 1px solid var(--neon-gold);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: var(--font-mono);
+            font-size: 0.85rem;
+            direction: ltr;
+            text-align: left;
+            color: #d4d4d4;
+            margin: 10px 0;
+            min-height: 80px;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+        .json-key { color: #9cdcfe; }
+        .json-string { color: #ce9178; }
+        .json-number { color: #b5cea8; }
+        .json-bool { color: #569cd6; }
+        .endpoint-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin: 15px 0;
+        }
+        .endpoint-item {
+            background: rgba(0,0,0,0.4);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 6px;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .endpoint-item:hover {
+            background: rgba(0, 212, 255, 0.1);
+            border-color: var(--neon-blue);
+        }
+        .endpoint-item.selected {
+            background: rgba(0, 255, 65, 0.1);
+            border-color: var(--neon-green);
+        }
+        .endpoint-path {
+            font-family: var(--font-mono);
+            color: var(--neon-green);
+            flex: 1;
+        }
+        .endpoint-desc {
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.6);
+        }
+        .hack-terminal {
+            background: #0a0a0f;
+            border: 1px solid var(--neon-red);
+            border-radius: 8px;
+            padding: 20px;
+            font-family: var(--font-mono);
+            direction: ltr;
+            text-align: left;
+            margin: 15px 0;
+        }
+        .python-playground {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 1px solid var(--neon-blue);
+            direction: ltr;
+            text-align: left;
+        }
+        .code-input {
+            background: #2d2d2d;
+            border: 1px solid #444;
+            color: #d4d4d4;
+            padding: 12px;
+            font-family: var(--font-mono);
+            width: 100%;
+            border-radius: 4px;
+            margin: 5px 0;
+            direction: ltr;
+            text-align: left;
+        }
+        .code-output {
+            background: #0d0d0d;
+            border: 1px solid var(--neon-green);
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: var(--font-mono);
+            min-height: 50px;
+            direction: ltr;
+            text-align: left;
+        }
+        .progress-tracker {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+            padding: 0 10px;
+        }
+        .track-step {
+            text-align: center;
+            opacity: 0.3;
+            transition: all 0.5s;
+        }
+        .track-step.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+        .track-step.completed {
+            opacity: 1;
+            color: var(--neon-green);
+        }
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 8px;
+        }
+        .status-ok { background: var(--neon-green); box-shadow: 0 0 5px var(--neon-green); }
+        .status-error { background: var(--neon-red); box-shadow: 0 0 5px var(--neon-red); }
+        .status-warn { background: var(--neon-gold); box-shadow: 0 0 5px var(--neon-gold); }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 10">LEVEL 10</h1>
+            <p class="cyber-subtitle">🌐 APIs & JSON — اختراق الخوادم</p>
+        </header>
+
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- PROGRESS TRACKER -->
+        <div class="progress-tracker" id="progress-tracker">
+            <div class="track-step active" data-step="1">
+                <div style="font-size: 1.5rem;">📚</div>
+                <div style="font-size: 0.7rem;">الدرس</div>
+            </div>
+            <div class="track-step" data-step="2">
+                <div style="font-size: 1.5rem;">🌐</div>
+                <div style="font-size: 0.7rem;">المحاكي</div>
+            </div>
+            <div class="track-step" data-step="3">
+                <div style="font-size: 1.5rem;">🎯</div>
+                <div style="font-size: 0.7rem;">المهمة</div>
+            </div>
+            <div class="track-step" data-step="4">
+                <div style="font-size: 1.5rem;">🏆</div>
+                <div style="font-size: 0.7rem;">CTF</div>
+            </div>
+        </div>
+
+        <!-- LESSON: APIs & JSON -->
+        <div class="cyber-section fade-in-up" id="lesson-section">
+            <h2>📚 الدرس: APIs & JSON</h2>
+            <p><strong>API</strong> هي بوابة تتحدث مع الخوادم. <strong>JSON</strong> هي لغة البيانات التي تفهمها جميع الأنظمة!</p>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 15px; border: 1px solid var(--neon-green); direction: ltr; text-align: left;">
+                    <h4 style="color: var(--neon-green); margin-bottom: 8px;">📤 GET Request</h4>
+                    <pre style="font-family: var(--font-mono); color: #d4d4d4; font-size: 0.85rem; line-height: 1.6;">import requests
+response = requests.get(
+    'https://api.omega.com/users'
+)
+data = response.json()
+print(data)</pre>
+                </div>
+                <div style="background: #1e1e1e; border-radius: 8px; padding: 15px; border: 1px solid var(--neon-blue); direction: ltr; text-align: left;">
+                    <h4 style="color: var(--neon-blue); margin-bottom: 8px;">📥 JSON Response</h4>
+                    <pre style="font-family: var(--font-mono); color: #d4d4d4; font-size: 0.85rem; line-height: 1.6;">{
+  "name": "OMEGA",
+  "status": "active",
+  "level": 999
+}</pre>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <p><strong>🔧 أوامر JSON المهمة:</strong></p>
+                <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 10px;">
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-green);">json.loads()</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">نص → JSON</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-blue);">json.dumps()</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">JSON → نص</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-gold);">data['key']</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">الوصول لقيمة</p>
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px; text-align: center;">
+                        <code style="color: var(--neon-pink);">response.json()</code>
+                        <p style="font-size: 0.8rem; color: rgba(255,255,255,0.7);">تحويل الرد</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="python-playground" style="margin-top: 20px;">
+                <div style="color: #6a9955; margin-bottom: 10px;"># جرب JSON:</div>
+                <textarea class="code-input" id="json-demo-input" rows="3">import json
+data = '{"name": "Agent", "level": 10}'
+parsed = json.loads(data)
+print(parsed["name"])</textarea>
+                <button class="cyber-btn" id="run-json-demo">▶️ تشغيل</button>
+                <div class="code-output" id="json-demo-output">اضغط "تشغيل"...</div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="cyber-btn primary" id="next-sim">ابدأ محاكي الاختراق 🌐</button>
+            </div>
+        </div>
+
+        <!-- API SIMULATOR -->
+        <div class="cyber-section fade-in-up" id="sim-section" style="display:none">
+            <h2>🌐 محاكي: اختراق خادم OMEGA</h2>
+            <p>هذا محاكي API محلي. اختر endpoint وشاهد الرد!</p>
+
+            <div class="api-simulator">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h4 style="color: var(--neon-blue);">📡 خوادم OMEGA المتاحة:</h4>
+                    <span style="font-family: var(--font-mono); font-size: 0.8rem; color: var(--neon-green);">
+                        <span class="status-indicator status-ok"></span>Online
+                    </span>
+                </div>
+
+                <div class="endpoint-list" id="endpoint-list">
+                    <div class="endpoint-item" data-endpoint="status">
+                        <span class="http-method method-get">GET</span>
+                        <span class="endpoint-path">/api/status</span>
+                        <span class="endpoint-desc">حالة النظام</span>
+                    </div>
+                    <div class="endpoint-item" data-endpoint="users">
+                        <span class="http-method method-get">GET</span>
+                        <span class="endpoint-path">/api/users</span>
+                        <span class="endpoint-desc">قائمة المستخدمين</span>
+                    </div>
+                    <div class="endpoint-item" data-endpoint="logs">
+                        <span class="http-method method-get">GET</span>
+                        <span class="endpoint-path">/api/logs</span>
+                        <span class="endpoint-desc">سجلات الدخول</span>
+                    </div>
+                    <div class="endpoint-item" data-endpoint="secrets">
+                        <span class="http-method method-post">POST</span>
+                        <span class="endpoint-path">/api/secrets</span>
+                        <span class="endpoint-desc">الأسرار (محمي)</span>
+                    </div>
+                </div>
+
+                <div class="http-request" id="http-request" style="display:none;">
+                    <span id="req-method" class="http-method method-get">GET</span>
+                    <span id="req-url" class="http-url">http://omega-server.com/api/status</span>
+                </div>
+
+                <div style="margin-top: 15px;">
+                    <h4 style="color: var(--neon-gold); margin-bottom: 8px;">📥 Response:</h4>
+                    <div class="json-response" id="json-response">
+                        <span style="color: rgba(255,255,255,0.3);">اختر endpoint لرؤية الرد...</span>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 15px;">
+                    <button class="cyber-btn" id="hint-sim">💡 تلميح</button>
+                </div>
+            </div>
+
+            <div id="sim-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">اخترقت API OMEGA!</h3>
+                <button class="cyber-btn primary" id="next-mission">المهمة النهائية 🎯</button>
+            </div>
+        </div>
+
+        <!-- MISSION: Extract API Data -->
+        <div class="cyber-section fade-in-up" id="mission-section" style="display:none">
+            <h2>🎯 المهمة: استخراج بيانات API</h2>
+            <p>لقد حصلت على رد JSON من خادم OMEGA. استخرج منه المعلومات الحساسة!</p>
+
+            <div class="hack-terminal">
+                <p style="color: var(--neon-red); margin-bottom: 10px;">📄 JSON Response:</p>
+                <div style="color: #d4d4d4; font-size: 0.85rem; line-height: 1.8;" id="mission-json">{
+  "organization": "OMEGA_CORP",
+  "headquarters": "Sector_7",
+  "director": {
+    "name": "OMEGA",
+    "id": "XK-99-ALPHA",
+    "status": "ARMED"
+  },
+  "agents": [
+    {"name": "Alpha", "level": 50},
+    {"name": "Beta", "level": 75},
+    {"name": "Gamma", "level": 99}
+  ],
+  "security_level": 999,
+  "self_destruct": false
+}</div>
+            </div>
+
+            <div style="margin-top: 20px;">
+                <p>اكتب كود Python لاستخراج البيانات:</p>
+
+                <div style="background: rgba(0,0,0,0.3); padding: 20px; border-radius: 8px; margin-top: 10px;">
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: var(--neon-gold);">🏢 1. اسم المنظمة:</label>
+                        <input type="text" class="code-input" id="mission-org" placeholder="data['organization']" value="">
+                        <button class="cyber-btn" id="check-org">✓ تحقق</button>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: var(--neon-blue);">👤 2. اسم المدير:</label>
+                        <input type="text" class="code-input" id="mission-director" placeholder="data['director']['name']" value="">
+                        <button class="cyber-btn" id="check-director">✓ تحقق</button>
+                    </div>
+                    <div style="margin-bottom: 15px;">
+                        <label style="color: var(--neon-red);">🔢 3. مستوى الأمان:</label>
+                        <input type="text" class="code-input" id="mission-security" placeholder="data['security_level']" value="">
+                        <button class="cyber-btn" id="check-security">✓ تحقق</button>
+                    </div>
+                    <div>
+                        <label style="color: var(--neon-pink);">🎖️ 4. عدد العملاء:</label>
+                        <input type="text" class="code-input" id="mission-agents" placeholder="len(data['agents'])" value="">
+                        <button class="cyber-btn" id="check-agents">✓ تحقق</button>
+                    </div>
+                </div>
+
+                <div class="code-output" id="mission-output" style="margin-top: 15px;"></div>
+            </div>
+
+            <div id="mission-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">⚠️</div>
+                <h3 style="color: var(--neon-red);">كل بيانات OMEGA مكشوفة!</h3>
+                <p style="color: var(--neon-gold); font-family: var(--font-mono); margin-top: 10px;">OMEGA_CORP | Sector_7 | 999</p>
+                <button class="cyber-btn primary" id="go-to-ctf">التحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي APIs & JSON المتقدم</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك! اجتزت المستوى 10!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            CE.playStory('intro', 10, () => {
+                CE.agentSpeak('correct', '🌐 APIs هي بوابات الخوادم! JSON هي لغتها!');
+            });
+
+            // Progress tracker
+            function setProgress(step) {
+                document.querySelectorAll('.track-step').forEach(s => {
+                    const sp = parseInt(s.dataset.step);
+                    s.classList.remove('active', 'completed');
+                    if (sp < step) s.classList.add('completed');
+                    else if (sp === step) s.classList.add('active');
+                });
+            }
+
+            // ========== LESSON DEMO ==========
+            document.getElementById('run-json-demo').addEventListener('click', () => {
+                const code = document.getElementById('json-demo-input').value;
+                const output = document.getElementById('json-demo-output');
+
+                try {
+                    let result = '';
+                    const origLog = console.log;
+                    console.log = (...a) => result += a.join(' ') + '\n';
+                    eval(code);
+                    console.log = origLog;
+                    output.innerHTML = `<span style="color: #00ff41;">✅ ${result}</span>`;
+                    CE.audio.success();
+                    CE.agentSpeak('correct', '💡 json.loads() يحول النص لقاموس Python!');
+                } catch(e) {
+                    output.innerHTML = `<span style="color: #ff3333;">❌ ${e.message}</span>`;
+                    CE.audio.fail();
+                    CE.agentSpeak('wrong');
+                    CE.state.currentSession.mistakes++;
+                }
+            });
+
+            document.getElementById('next-sim').addEventListener('click', () => {
+                document.getElementById('lesson-section').style.display = 'none';
+                document.getElementById('sim-section').style.display = 'block';
+                document.getElementById('sim-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(2);
+                CE.audio.click();
+            });
+
+            // ========== API SIMULATOR ==========
+            const endpoints = {
+                status: {
+                    method: 'GET',
+                    url: 'http://omega-server.com/api/status',
+                    response: {
+                        status: "online",
+                        uptime: "99.9%",
+                        security_level: 999,
+                        alert: "UNAUTHORIZED ACCESS DETECTED"
+                    }
+                },
+                users: {
+                    method: 'GET',
+                    url: 'http://omega-server.com/api/users',
+                    response: {
+                        users: [
+                            { id: 1, name: "admin", role: "root" },
+                            { id: 2, name: "agent007", role: "operator" },
+                            { id: 3, name: "omega", role: "director" }
+                        ],
+                        total: 3
+                    }
+                },
+                logs: {
+                    method: 'GET',
+                    url: 'http://omega-server.com/api/logs',
+                    response: {
+                        logs: [
+                            { time: "03:47", event: "BREACH ATTEMPT", ip: "192.168.1.100" },
+                            { time: "03:48", event: "ACCESS DENIED", ip: "192.168.1.100" },
+                            { time: "03:49", event: "ALERT TRIGGERED", ip: "192.168.1.100" }
+                        ]
+                    }
+                },
+                secrets: {
+                    method: 'POST',
+                    url: 'http://omega-server.com/api/secrets',
+                    response: {
+                        error: "ACCESS DENIED",
+                        message: "Authentication required. Token: OMEGA_XK99",
+                        hint: "Use header: Authorization: Bearer OMEGA_XK99"
+                    }
+                }
+            };
+
+            let endpointsHit = 0;
+
+            document.querySelectorAll('.endpoint-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    document.querySelectorAll('.endpoint-item').forEach(i => i.classList.remove('selected'));
+                    item.classList.add('selected');
+
+                    const ep = item.dataset.endpoint;
+                    const data = endpoints[ep];
+
+                    document.getElementById('http-request').style.display = 'block';
+                    const methodEl = document.getElementById('req-method');
+                    methodEl.textContent = data.method;
+                    methodEl.className = 'http-method method-' + data.method.toLowerCase();
+                    document.getElementById('req-url').textContent = data.url;
+
+                    // Simulate delay
+                    document.getElementById('json-response').innerHTML = '<span style="color: rgba(255,255,255,0.3);">Loading...</span>';
+
+                    setTimeout(() => {
+                        const jsonStr = JSON.stringify(data.response, null, 2);
+                        const colored = jsonStr
+                            .replace(/"([^"]+)":/g, '<span class="json-key">"$1":</span>')
+                            .replace(/: "([^"]+)"/g, ': <span class="json-string">"$1"</span>')
+                            .replace(/: (\d+)/g, ': <span class="json-number">$1</span>')
+                            .replace(/: (true|false)/g, ': <span class="json-bool">$1</span>');
+
+                        document.getElementById('json-response').innerHTML = colored;
+                        CE.audio.click();
+
+                        if (!item.dataset.hit) {
+                            item.dataset.hit = 'true';
+                            endpointsHit++;
+                        }
+
+                        if (endpointsHit >= 4) {
+                            document.getElementById('sim-complete').style.display = 'block';
+                            CE.audio.hack();
+                            CE.agentSpeak('correct', '🔥 اخترقت كل endpoints!');
+                            CE.addXP(100, 'API Hacked');
+                        }
+                    }, 500);
+                });
+            });
+
+            document.getElementById('hint-sim').addEventListener('click', () => {
+                CE.showSmartHint('جرب /api/secrets... لكنه محمي! ماذا يقول الرد؟', 'endpoint-list');
+            });
+
+            document.getElementById('next-mission').addEventListener('click', () => {
+                document.getElementById('sim-section').style.display = 'none';
+                document.getElementById('mission-section').style.display = 'block';
+                document.getElementById('mission-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(3);
+                CE.audio.click();
+            });
+
+            // ========== MISSION ==========
+            const missionData = {
+                organization: "OMEGA_CORP",
+                headquarters: "Sector_7",
+                director: { name: "OMEGA", id: "XK-99-ALPHA", status: "ARMED" },
+                agents: [{ name: "Alpha" }, { name: "Beta" }, { name: "Gamma" }],
+                security_level: 999
+            };
+
+            let orgDone = false, directorDone = false, securityDone = false, agentsDone = false;
+
+            function checkMission(inputId, expected, type, btnId) {
+                const btn = document.getElementById(btnId);
+                btn.addEventListener('click', () => {
+                    const input = document.getElementById(inputId).value.trim();
+                    const output = document.getElementById('mission-output');
+
+                    try {
+                        let result;
+                        // Simulate accessing the JSON data
+                        if (type === 'org' && (input.includes("organization") || input === "'OMEGA_CORP'" || input === '"OMEGA_CORP"')) {
+                            result = "OMEGA_CORP";
+                            orgDone = true;
+                        } else if (type === 'director' && (input.includes("director") && input.includes("name"))) {
+                            result = "OMEGA";
+                            directorDone = true;
+                        } else if (type === 'security' && (input.includes("security_level") || input === "999")) {
+                            result = "999";
+                            securityDone = true;
+                        } else if (type === 'agents' && (input.includes("agents") && (input.includes("len") || input.includes("length")))) {
+                            result = "3";
+                            agentsDone = true;
+                        } else {
+                            output.innerHTML += `<div style="color: #ff3333;">❌ غير صحيح! جرب مرة أخرى.</div>`;
+                            CE.audio.fail();
+                            CE.agentSpeak('hint', '💡 انظر للبنية: data["key"] أو data["director"]["name"]');
+                            CE.state.currentSession.mistakes++;
+                            return;
+                        }
+
+                        output.innerHTML += `<div style="color: #00ff41;">✅ ${type}: ${result}</div>`;
+                        CE.audio.success();
+                        btn.disabled = true;
+                        btn.textContent = '✅ تم';
+
+                        if (orgDone && directorDone && securityDone && agentsDone) {
+                            document.getElementById('mission-complete').style.display = 'block';
+                            CE.audio.hack();
+                            CE.agentSpeak('correct', '🔥 OMEGA_CORP في Sector_7 بأمان 999!');
+                            CE.addXP(100, 'Data Extracted');
+                        }
+                    } catch(e) {
+                        output.innerHTML += `<div style="color: #ff3333;">❌ خطأ: ${e.message}</div>`;
+                        CE.audio.fail();
+                    }
+                });
+            }
+
+            checkMission('mission-org', 'OMEGA_CORP', 'org', 'check-org');
+            checkMission('mission-director', 'OMEGA', 'director', 'check-director');
+            checkMission('mission-security', '999', 'security', 'check-security');
+            checkMission('mission-agents', '3', 'agents', 'check-agents');
+
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('mission-section').style.display = 'none';
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                setProgress(4);
+                initQuiz();
+                CE.audio.click();
+            });
+
+            // ========== CTF ==========
+            const questions = [
+                { q: 'ما هي دالة تحويل النص لـ JSON في Python؟', options: ['json.read()', 'json.loads()', 'json.parse()', 'json.decode()'], correct: 1 },
+                { q: 'أي طريقة HTTP تُستخدم لجلب البيانات؟', options: ['POST', 'GET', 'DELETE', 'PUT'], correct: 1 },
+                { q: 'كيف تصل لقيمة name داخل director في JSON؟', options: ['data["name"]', 'data["director"]["name"]', 'data.director.name', 'B و C صحيح'], correct: 3 },
+                { q: 'json.dumps() تفعل:', options: ['تقرأ JSON', 'تكتب JSON كنص', 'تحذف JSON', 'تنشئ ملف'], correct: 1 }
+            ];
+
+            let currentQ = 0, score = 0;
+            function initQuiz() { currentQ = 0; score = 0; showQuestion(); }
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;"><div style="font-size:3rem;">🎯</div><h3>النتيجة: ${score}/${questions.length}</h3></div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct'); CE.audio.success(); CE.agentSpeak('correct'); score++;
+                        } else {
+                            this.classList.add('wrong'); CE.audio.fail(); CE.agentSpeak('wrong'); CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => { currentQ++; showQuestion(); }, 1000);
+                    });
+                });
+            }
+
+            document.getElementById('complete-level').addEventListener('click', () => {
+                CE.completeLevel(10, 150 + score * 50);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 10, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: json.loads() للقراءة, json.dumps() للكتابة, GET للجلب!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+</body>
+</html>
