@@ -328,3 +328,38 @@
     </script>
 </body>
 </html>
+<script>
+// ====== نظام الحفظ ======
+function saveProgress(level) {
+    localStorage.setItem('cyberRPG_level', level);
+    localStorage.setItem('cyberRPG_date', new Date().toLocaleString());
+}
+function getSavedLevel() {
+    return localStorage.getItem('cyberRPG_level') || '1';
+}
+function clearProgress() {
+    localStorage.removeItem('cyberRPG_level');
+    localStorage.removeItem('cyberRPG_date');
+    alert('تم مسح التقدم!');
+    location.reload();
+}
+function continueGame() {
+    var lvl = getSavedLevel();
+    window.location.href = 'levels/level' + lvl + '.html';
+}
+
+// عند التحميل - إظهار زر الاستمرار
+window.addEventListener('load', function() {
+    var saved = getSavedLevel();
+    if (saved !== '1') {
+        var div = document.createElement('div');
+        div.style.cssText = 'text-align:center;margin:20px;padding:15px;background:rgba(0,255,136,0.1);border:2px solid #00ff88;border-radius:15px;';
+        div.innerHTML = '<h3 style="color:#00ff88;margin:0;">📂 تقدم محفوظ!</h3>' +
+            '<p style="color:#888;margin:5px;">آخر مرحلة: ' + saved + ' | ' + (localStorage.getItem('cyberRPG_date')||'') + '</p>' +
+            '<button onclick="continueGame()" style="background:#00ff88;color:#000;padding:12px 30px;font-size:1.1em;border:none;border-radius:10px;margin:5px;cursor:pointer;font-weight:bold;">▶️ استمر من المرحلة ' + saved + '</button>' +
+            '<button onclick="clearProgress()" style="background:#ff4444;color:#fff;padding:8px 20px;font-size:0.9em;border:none;border-radius:10px;margin:5px;cursor:pointer;">🗑️ مسح التقدم</button>';
+        var body = document.body;
+        body.insertBefore(div, body.firstChild);
+    }
+});
+</script>
