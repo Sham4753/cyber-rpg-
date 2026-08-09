@@ -1251,3 +1251,113 @@ body::after {
     background: var(--neon-green);
     color: var(--dark-bg);
 }
+/* ============================
+   RESPONSIVE DESIGN - MOBILE
+   ============================ */
+
+@media screen and (max-width: 768px) {
+  body {
+    font-size: 16px;
+    padding: 10px;
+    overflow-x: hidden;
+  }
+
+  /* العناوين */
+  h1 { font-size: 1.8em; }
+  h2 { font-size: 1.4em; }
+  h3 { font-size: 1.2em; }
+
+  /* الأزرار - أكبر للمس */
+  button, .btn, input[type="button"] {
+    width: 100%;
+    padding: 15px 20px;
+    font-size: 1.1em;
+    margin: 8px 0;
+    border-radius: 12px;
+    min-height: 50px;
+  }
+
+  /* الحاويات */
+  .container, #game-container, .game-wrapper {
+    width: 100%;
+    max-width: 100%;
+    padding: 10px;
+    margin: 0 auto;
+  }
+
+  /* النصوص */
+  p, span, div {
+    font-size: 1em;
+    line-height: 1.6;
+  }
+
+  /* القوائم */
+  ul, ol {
+    padding-left: 20px;
+  }
+
+  /* الصور */
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+
+  /* إخفاء العناصر الكبيرة */
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+/* ============================
+   COMPUTER / DESKTOP
+   ============================ */
+
+@media screen and (min-width: 769px) {
+  body {
+    font-size: 18px;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  .container, #game-container {
+    width: 80%;
+    margin: 0 auto;
+  }
+
+  button, .btn {
+    padding: 12px 30px;
+    font-size: 1.1em;
+    cursor: pointer;
+  }
+}
+
+/* ============================
+   TOUCH FRIENDLY
+   ============================ */
+
+button:active, .btn:active {
+  transform: scale(0.95);
+  opacity: 0.9;
+}
+
+/* منع التحديد */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+@media screen and (max-width: 768px) {
+  body { font-size: 16px; padding: 10px; overflow-x: hidden; }
+  h1 { font-size: 1.8em; }
+  h2 { font-size: 1.4em; }
+  button, .btn { width: 100%; padding: 15px; font-size: 1.1em; margin: 8px 0; border-radius: 12px; min-height: 50px; }
+  .container, #game-container { width: 100%; padding: 10px; margin: 0 auto; }
+  img { max-width: 100%; height: auto; }
+}
+@media screen and (min-width: 769px) {
+  body { font-size: 18px; max-width: 1200px; margin: 0 auto; padding: 20px; }
+  .container { width: 80%; margin: 0 auto; }
+}
+button:active { transform: scale(0.95); }
+* { -webkit-tap-highlight-color: transparent; }
