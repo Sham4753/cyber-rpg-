@@ -4,17 +4,16 @@
  * ╚══════════════════════════════════════════════════════════════╝
  */
 
-// ⚠️ هذه الإعدادات مجانية وآمنة - المفتاح عام (browser key)
 const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyDummyKeyForCyberRPG123456789",
+    apiKey: "AIzaSyAFsoX4iB-ntmBY-ovXthQXTxZMiK-OUSw",
     authDomain: "cyber-rpg-game.firebaseapp.com",
     projectId: "cyber-rpg-game",
-    storageBucket: "cyber-rpg-game.appspot.com",
-    messagingSenderId: "123456789012",
-    appId: "1:123456789012:web:abcdef1234567890"
+    storageBucket: "cyber-rpg-game.firebasestorage.app",
+    messagingSenderId: "916952659932",
+    appId: "1:916952659932:web:58345add57b9aea1dac119",
+    measurementId: "G-TB5V5F296G"
 };
 
-// Initialize Firebase
 let firebaseApp = null;
 let firebaseAuth = null;
 let firebaseDb = null;
@@ -38,12 +37,10 @@ function initFirebase() {
     }
 }
 
-// Check if Firebase is available
 function isFirebaseReady() {
     return firebaseApp !== null && firebaseAuth !== null && firebaseDb !== null;
 }
 
-// Export
 window.FirebaseConfig = {
     init: initFirebase,
     isReady: isFirebaseReady,
