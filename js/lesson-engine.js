@@ -130,6 +130,10 @@ const LessonEngine = (function() {
         // RENDER - بناء الدرس كاملاً
         // ═══════════════════════════════════════════════════════
         render() {
+            // Register this builder globally for navigation
+            if (!window.__lessonBuilders) window.__lessonBuilders = [];
+            window.__lessonBuilders.push(this);
+            
             this.container.innerHTML = '';
             
             // Header: Progress Bar
@@ -150,6 +154,7 @@ const LessonEngine = (function() {
             this.container.appendChild(stepsContainer);
 
             // Render each step
+                const self = this;
             this.steps.forEach((step, index) => {
                 const stepEl = document.createElement('div');
                 stepEl.className = 'lesson-step';
@@ -160,9 +165,9 @@ const LessonEngine = (function() {
                 stepEl.innerHTML = `
                     <div class="lesson-step-badge">${typeInfo.icon} ${typeInfo.title}</div>
                     <div class="lesson-step-content" id="step-content-${index}"></div>
-                    <div class="lesson-step-nav">
-                        ${index > 0 ? `<button class="cyber-btn" onclick="LessonEngine.prevStep()">⬅️ السابق</button>` : ''}
-                        ${index < this.steps.length - 1 ? `<button class="cyber-btn primary" id="next-btn-${index}">التالي ➡️</button>` : `<button class="cyber-btn primary" id="finish-btn">إكمال الدرس 🏆</button>`}
+                    <div class="lesson-step-nav" id="step-nav-${index}">
+                        ${index > 0 ? `<button class="cyber-btn" id="prev-btn-${index}">⬅️ السابق</button>` : ''}
+                        ${index < this.steps.length - 1 ? `<button class="cyber-btn primary" id="next-btn-${index}">التالي ➡️</button>` : `<button class="cyber-btn primary" id="finish-btn-${index}">إكمال الدرس 🏆</button>`}
                     </div>
                 `;
                 
@@ -176,6 +181,9 @@ const LessonEngine = (function() {
             // Navigation dots
             this.updateNav();
             this.updateProgress();
+            
+            // Attach navigation listeners
+            this.attachNavListeners();
         }
 
         // ═══════════════════════════════════════════════════════
@@ -387,18 +395,120 @@ const LessonEngine = (function() {
                 </div>
             `;
 
-            // Setup terminal
-            if (window.CyberEngine && window.CyberEngine.Terminal) {
-                const term = new window.CyberEngine.Terminal(`practice-terminal-${stepIndex}`, {
-                    prompt: data.prompt || 'agent@cyber-rpg:~$ '
-                });
-
-                // Register practice commands
+            // Setup terminal - built-in fallback
+            const termEl = document.getElementById(`practice-terminal-${stepIndex}`);
+            if (termEl) {
+                // Create simple built-in terminal
+                const term = {
+                    el: termEl,
+                    history: [],
+                    historyIndex: -1,
+                    prompt: data.prompt || 'agent@cyber-rpg:~$ ',
+                    
+                    print: function(text, type) {
+                        const line = document.createElement('div');
+                        line.style.cssText = 'padding:4px 0; font-family:var(--font-mono); border-bottom:1px solid rgba(0,255,65,0.1);';
+                        if (type === 'error') line.style.color = 'var(--neon-red)';
+                        else if (type === 'success') line.style.color = 'var(--neon-green)';
+                        else line.style.color = '#d4d4d4';
+                        line.textContent = text;
+                        this.output.appendChild(line);
+                        this.output.scrollTop = this.output.scrollHeight;
+                    },
+                    
+                    clear: function() {
+                        this.output.innerHTML = '';
+                    }
+                };
+                
+                // Build terminal UI
+                termEl.style.cssText = 'background:#0d0d0d; border:1px solid var(--neon-green); border-radius:8px; padding:15px; font-family:var(--font-mono); min-height:200px;';
+                termEl.innerHTML = '<div class="term-output" style="min-height:150px; max-height:250px; overflow-y:auto; margin-bottom:10px;"></div><div class="term-input-line" style="display:flex; align-items:center;"><span class="term-prompt" style="color:var(--neon-green); margin-left:5px;"></span><input type="text" class="term-input" style="flex:1; background:transparent; border:none; color:#d4d4d4; font-family:var(--font-mono); font-size:1rem; outline:none;" autocomplete="off" spellcheck="false"></div>';
+                
+                term.output = termEl.querySelector('.term-output');
+                term.promptEl = termEl.querySelector('.term-prompt');
+                term.input = termEl.querySelector('.term-input');
+                term.promptEl.textContent = term.prompt;
+                
+                // Print welcome
+                term.print('=== Terminal جاهز ===', 'success');
+                term.print('اكتب help للمساعدة');
+                
+                // Command handler
+                const commandHandlers = {};
                 if (data.commands) {
                     Object.keys(data.commands).forEach(cmd => {
-                        term.registerCommand(cmd, (args, t) => data.commands[cmd](args, t, this));
+                        commandHandlers[cmd] = data.commands[cmd];
                     });
                 }
+                
+                // Default commands
+                commandHandlers['help'] = function(args, t) {
+                    t.print('=== الأوامر المتاحة ===', 'success');
+                    Object.keys(commandHandlers).forEach(c => t.print('  ' + c));
+                };
+                commandHandlers['clear'] = function(args, t) {
+                    t.clear();
+                };
+                
+                // Input handler
+                term.input.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        const cmdLine = this.value.trim();
+                        if (!cmdLine) return;
+                        
+                        // Echo
+                        const echo = document.createElement('div');
+                        echo.style.cssText = 'color:var(--neon-green); padding:4px 0;';
+                        echo.textContent = term.prompt + ' ' + cmdLine;
+                        term.output.appendChild(echo);
+                        
+                        // Parse
+                        const parts = cmdLine.split(/\s+/);
+                        const cmd = parts[0];
+                        const args = parts.slice(1);
+                        
+                        // Execute
+                        if (commandHandlers[cmd]) {
+                            try {
+                                commandHandlers[cmd](args, term, builder);
+                            } catch(err) {
+                                term.print('❌ خطأ: ' + err.message, 'error');
+                            }
+                        } else {
+                            term.print('❌ أمر غير معروف: ' + cmd, 'error');
+                            term.print('اكتب help للمساعدة');
+                        }
+                        
+                        // History
+                        term.history.push(cmdLine);
+                        term.historyIndex = term.history.length;
+                        this.value = '';
+                        term.output.scrollTop = term.output.scrollHeight;
+                        
+                        if (window.CyberEngine && window.CyberEngine.audio) {
+                            window.CyberEngine.audio.click();
+                        }
+                    } else if (e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        if (term.historyIndex > 0) {
+                            term.historyIndex--;
+                            this.value = term.history[term.historyIndex];
+                        }
+                    } else if (e.key === 'ArrowDown') {
+                        e.preventDefault();
+                        if (term.historyIndex < term.history.length - 1) {
+                            term.historyIndex++;
+                            this.value = term.history[term.historyIndex];
+                        } else {
+                            term.historyIndex = term.history.length;
+                            this.value = '';
+                        }
+                    }
+                });
+                
+                // Focus on click
+                termEl.addEventListener('click', () => term.input.focus());
 
                 // Hint system
                 const hintBtn = document.getElementById(`practice-hint-btn-${stepIndex}`);
@@ -519,6 +629,36 @@ const LessonEngine = (function() {
         // ═══════════════════════════════════════════════════════
         // NAVIGATION
         // ═══════════════════════════════════════════════════════
+        attachNavListeners() {
+            this.steps.forEach((step, index) => {
+                const nextBtn = document.getElementById(`next-btn-${index}`);
+                const prevBtn = document.getElementById(`prev-btn-${index}`);
+                const finishBtn = document.getElementById(`finish-btn-${index}`);
+                
+                if (nextBtn) {
+                    nextBtn.addEventListener('click', () => {
+                        this.goToStep(this.currentStep + 1);
+                    });
+                }
+                if (prevBtn) {
+                    prevBtn.addEventListener('click', () => {
+                        this.goToStep(this.currentStep - 1);
+                    });
+                }
+                if (finishBtn) {
+                    finishBtn.addEventListener('click', () => {
+                        if (window.CyberEngine) {
+                            window.CyberEngine.audio.levelUp();
+                            window.CyberEngine.agentSpeak('correct', '🎉 أحسنت! أكملت الدرس بنجاح!');
+                        }
+                        setTimeout(() => {
+                            window.location.href = '../index.html';
+                        }, 2000);
+                    });
+                }
+            });
+        }
+
         updateNav() {
             const nav = document.getElementById('lesson-steps-nav');
             if (!nav) return;
@@ -539,7 +679,7 @@ const LessonEngine = (function() {
 
         goToStep(index) {
             if (index < 0 || index >= this.steps.length) return;
-            if (index > this.currentStep + 1) return; // Can't skip ahead
+            // Allow navigation to any visited or next step
             
             this.stepElements[this.currentStep].style.display = 'none';
             this.currentStep = index;
@@ -556,17 +696,25 @@ const LessonEngine = (function() {
     // ═══════════════════════════════════════════════════════════
     function nextStep() {
         const builders = window.__lessonBuilders || [];
-        builders.forEach(b => b.goToStep(b.currentStep + 1));
+        if (builders.length > 0) {
+            const b = builders[builders.length - 1];
+            b.goToStep(b.currentStep + 1);
+        }
     }
 
     function prevStep() {
         const builders = window.__lessonBuilders || [];
-        builders.forEach(b => b.goToStep(b.currentStep - 1));
+        if (builders.length > 0) {
+            const b = builders[builders.length - 1];
+            b.goToStep(b.currentStep - 1);
+        }
     }
 
     function goToStep(index) {
         const builders = window.__lessonBuilders || [];
-        builders.forEach(b => b.goToStep(index));
+        if (builders.length > 0) {
+            builders[builders.length - 1].goToStep(index);
+        }
     }
 
     // ═══════════════════════════════════════════════════════════
