@@ -1,0 +1,10 @@
+/* ULTIMATE FORCE - No element exceeds screen */
+html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    position: relative !important;
+}
+*, *::before, *::after {
+    max-width: 100vw;
+    box-sizing: border-box;
+}
