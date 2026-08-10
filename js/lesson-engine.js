@@ -471,7 +471,7 @@ const LessonEngine = (function() {
                         // Execute
                         if (commandHandlers[cmd]) {
                             try {
-                                commandHandlers[cmd](args, term, builder);
+                                commandHandlers[cmd](args, term, typeof builder !== "undefined" ? builder : null);
                             } catch(err) {
                                 term.print('❌ خطأ: ' + err.message, 'error');
                             }

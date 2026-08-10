@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 1: Terminal Basics</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+</head>
+<body>
+<div id="loading-screen" style="position:fixed;top:0;left:0;width:100%;height:100%;background:#0a0a0f;z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;transition:opacity 0.5s;">
+    <div style="font-size:3rem;animation:pulse 1s infinite;">⚡</div>
+    <div style="color:#00ff41;font-family:monospace;margin-top:20px;font-size:1.2rem;">LOADING CYBER SYSTEM...</div>
+    <div style="width:200px;height:4px;background:#1a1a2e;margin-top:15px;border-radius:2px;overflow:hidden;">
+        <div style="width:0%;height:100%;background:#00ff41;animation:loadBar 2s ease-in-out forwards;"></div>
+    </div>
+</div>
+<style>@keyframes loadBar{to{width:100%}}@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}</style>
+<script>window.addEventListener("load",function(){setTimeout(function(){var ls=document.getElementById("loading-screen");if(ls){ls.style.opacity="0";setTimeout(function(){ls.remove()},500);}},1500);});</script>
+
+    <canvas id="matrix-canvas"></canvas>
+    <button class="mode-toggle" id="mode-toggle">KIDS MODE</button>
+
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 1">LEVEL 1</h1>
+            <p class="cyber-subtitle">🔓 Terminal Basics - أوامر Linux الأساسية</p>
+        </header>
+
+        <!-- HUD -->
+        <div class="cyber-hud" id="main-hud">
+            <div class="hud-item"><div class="hud-label">المستوى</div><div class="hud-value" id="hud-level">1</div></div>
+            <div class="hud-item"><div class="hud-label">الرتبة</div><div class="hud-value" id="hud-rank">👶 Script Kiddie</div></div>
+            <div class="hud-item"><div class="hud-label">النقاط</div><div class="hud-value" id="hud-xp">0</div></div>
+            <div class="hud-item"><div class="hud-label">الحياة</div><div class="hud-value" id="hud-lives">❤️❤️❤️</div></div>
+            <div class="hud-item"><div class="hud-label">الشرارة</div><div class="hud-value" id="hud-streak" style="display:none">🔥 0</div></div>
+            <div class="hud-xp-bar-container">
+                <div class="hud-xp-bar-bg"><div class="hud-xp-bar" id="hud-xp-bar" style="width: 0%"></div></div>
+            </div>
+        </div>
+
+        <!-- LESSON CONTENT -->
+        <div class="cyber-section fade-in-up">
+            <h2>📚 الدرس: أوامر Linux الأساسية</h2>
+            <p>في عالم الاختراق، <strong>Terminal</strong> هو سيفك! هذه الأوامر الخمسة هي حجر الأساس:</p>
+
+            <div style="margin: 20px 0; display: grid; gap: 15px;">
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-right: 4px solid var(--neon-green);">
+                    <code style="font-size: 1.2rem;">pwd</code>
+                    <p style="margin-top: 8px;">📍 <strong>Print Working Directory</strong> - يظهر لك المجلد الحالي الذي تعمل فيه</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-right: 4px solid var(--neon-blue);">
+                    <code style="font-size: 1.2rem;">ls</code>
+                    <p style="margin-top: 8px;">📂 <strong>List</strong> - يعرض جميع الملفات والمجلدات في المكان الحالي</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-right: 4px solid var(--neon-pink);">
+                    <code style="font-size: 1.2rem;">cd [folder]</code>
+                    <p style="margin-top: 8px;">🚪 <strong>Change Directory</strong> - ينقلك إلى مجلد آخر (مثل فتح باب!)</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-right: 4px solid var(--neon-orange);">
+                    <code style="font-size: 1.2rem;">cat [file]</code>
+                    <p style="margin-top: 8px;">📖 <strong>Concatenate</strong> - يعرض محتوى الملف (مثل قراءة رسالة سرية!)</p>
+                </div>
+                <div style="background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; border-right: 4px solid var(--neon-gold);">
+                    <code style="font-size: 1.2rem;">clear</code>
+                    <p style="margin-top: 8px;">🧹 ينظف الشاشة ليبدأ من جديد</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- INTERACTIVE TERMINAL -->
+        <div class="cyber-section fade-in-up">
+            <h2>💻 محاكي التيرمنال التفاعلي</h2>
+            <p>جرب الأوامر بنفسك! اكتب <code>help</code> لرؤية جميع الأوامر المتاحة.</p>
+            <div class="cyber-terminal" id="terminal" style="margin-top: 20px;"></div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button class="cyber-btn" id="hint-btn">💡 أحتاج تلميحاً</button>
+                <button class="cyber-btn" id="reset-terminal">🔄 إعادة التعيين</button>
+            </div>
+        </div>
+
+        <!-- MISSION -->
+        <div class="cyber-section fade-in-up">
+            <h2>🎯 المهمة: اخترق الباب الإلكتروني</h2>
+            <p>هناك ملف سري يحتوي على كلمة المرور. استخدم الأوامر لتجد الملف وقراءته!</p>
+            <div id="mission-hints" style="margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 8px;">
+                <p style="color: var(--neon-gold);">📌 خطوات المهمة:</p>
+                <ol style="margin-top: 10px; padding-right: 20px; line-height: 2;">
+                    <li>استخدم <code>ls</code> لمعرفة ما يوجد في المجلد</li>
+                    <li>استخدم <code>cd secret_room</code> للدخول للغرفة السرية</li>
+                    <li>استخدم <code>ls</code> مرة أخرى</li>
+                    <li>استخدم <code>cat password.txt</code> لقراءة كلمة المرور</li>
+                </ol>
+            </div>
+            <div id="mission-complete" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🎉</div>
+                <h3 style="color: var(--neon-green);">أحسنت! لقد وجدت كلمة المرور!</h3>
+                <button class="cyber-btn primary" id="go-to-ctf">الانتقال للتحدي النهائي ➡️</button>
+            </div>
+        </div>
+
+        <!-- CTF CHALLENGE -->
+        <div class="cyber-section fade-in-up" id="ctf-section" style="display:none">
+            <h2>🏆 تحدي CTF - اختبار المعرفة</h2>
+            <div class="quiz-container" id="quiz-container"></div>
+            <div id="ctf-result" style="display:none; text-align: center; margin-top: 20px;">
+                <div style="font-size: 3rem; margin-bottom: 10px;">🏆</div>
+                <h3 style="color: var(--neon-gold);">مبروك! اجتزت التحدي!</h3>
+                <button class="cyber-btn primary" id="complete-level">إكمال المستوى والحصول على الجائزة 🎁</button>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <div id="agent-zero">
+        <div class="agent-avatar" id="agent-avatar">🤖</div>
+    </div>
+
+    <script src="../js/cyber-engine.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+
+            // Play intro story
+            CE.playStory('intro', 1, () => {
+                CE.agentSpeak('correct', '👋 مرحباً Agent! جرب أوامر التيرمنال في الأسفل!');
+            });
+
+            // Terminal setup
+            const term = new CE.Terminal('terminal', { prompt: 'agent@cyber-rpg:~$ ' });
+
+            // Virtual filesystem
+            const fs = {
+                '/': {
+                    type: 'dir',
+                    contents: ['secret_room', 'notes.txt', 'readme.md']
+                },
+                '/secret_room': {
+                    type: 'dir',
+                    contents: ['password.txt', 'clue.txt']
+                },
+                '/notes.txt': {
+                    type: 'file',
+                    content: 'ملاحظات Agent: الباب الإلكتروني محمي بكلمة سر. ابحث في الغرفة السرية!'
+                },
+                '/readme.md': {
+                    type: 'file',
+                    content: 'مرحباً بك في CYBER RPG! استخدم الأوامر للتنقل والاستكشاف.'
+                },
+                '/secret_room/password.txt': {
+                    type: 'file',
+                    content: '🔓 كلمة المرور: CYBER_AGENT_2024'
+                },
+                '/secret_room/clue.txt': {
+                    type: 'file',
+                    content: '💡 تلميح: استخدم cat لقراءة الملفات!'
+                }
+            };
+
+            let currentDir = '/';
+            let missionComplete = false;
+
+            function getPath(name) {
+                if (name.startsWith('/')) return name;
+                if (currentDir === '/') return '/' + name;
+                return currentDir + '/' + name;
+            }
+
+            term.registerCommand('help', () => {
+                term.print('=== الأوامر المتاحة ===', 'success');
+                term.print('pwd     - عرض المجلد الحالي');
+                term.print('ls      - عرض الملفات');
+                term.print('cd [dir]- الانتقال لمجلد');
+                term.print('cat [file]- قراءة ملف');
+                term.print('clear   - مسح الشاشة');
+                term.print('help    - هذا التعليمات');
+            });
+
+            term.registerCommand('pwd', () => {
+                term.print(currentDir);
+            });
+
+            term.registerCommand('ls', () => {
+                const path = fs[currentDir];
+                if (path && path.type === 'dir') {
+                    path.contents.forEach(item => {
+                        const itemPath = getPath(item);
+                        const isDir = fs[itemPath] && fs[itemPath].type === 'dir';
+                        term.print((isDir ? '📁 ' : '📄 ') + item);
+                    });
+                }
+            });
+
+            term.registerCommand('cd', (args) => {
+                if (!args[0] || args[0] === '~') {
+                    currentDir = '/';
+                    term.print('عدت للمجلد الرئيسي');
+                    return;
+                }
+                if (args[0] === '..') {
+                    if (currentDir !== '/') {
+                        currentDir = currentDir.substring(0, currentDir.lastIndexOf('/')) || '/';
+                    }
+                    term.print(currentDir);
+                    return;
+                }
+                const newPath = getPath(args[0]);
+                if (fs[newPath] && fs[newPath].type === 'dir') {
+                    currentDir = newPath;
+                    term.print('دخلت إلى: ' + currentDir);
+                    CE.audio.click();
+                } else {
+                    term.print('خطأ: المجلد غير موجود', 'error');
+                    CE.audio.fail();
+                }
+            });
+
+            term.registerCommand('cat', (args) => {
+                if (!args[0]) {
+                    term.print('استخدام: cat [اسم الملف]', 'error');
+                    return;
+                }
+                const filePath = getPath(args[0]);
+                if (fs[filePath] && fs[filePath].type === 'file') {
+                    term.print(fs[filePath].content, 'success');
+                    CE.audio.success();
+
+                    if (filePath === '/secret_room/password.txt' && !missionComplete) {
+                        missionComplete = true;
+                        document.getElementById('mission-complete').style.display = 'block';
+                        CE.agentSpeak('correct', '🎉 رائع! وجدت كلمة المرور! انتقل للتحدي النهائي!');
+                        CE.addXP(50, 'Mission Complete');
+                    }
+                } else {
+                    term.print('خطأ: الملف غير موجود', 'error');
+                    CE.audio.fail();
+                }
+            });
+
+            term.registerCommand('clear', () => {
+                term.clear();
+            });
+
+            // Hint button
+            document.getElementById('hint-btn').addEventListener('click', () => {
+                CE.showSmartHint('جرب كتابة ls ثم cd secret_room', 'terminal');
+            });
+
+            document.getElementById('reset-terminal').addEventListener('click', () => {
+                currentDir = '/';
+                term.clear();
+                term.print('=== CYBER TERMINAL v3.0 ===', 'success');
+                term.print('اكتب help للمساعدة');
+            });
+
+            // Go to CTF
+            document.getElementById('go-to-ctf').addEventListener('click', () => {
+                document.getElementById('ctf-section').style.display = 'block';
+                document.getElementById('ctf-section').scrollIntoView({ behavior: 'smooth' });
+                initQuiz();
+                CE.audio.click();
+            });
+
+            // Quiz
+            const questions = [
+                {
+                    q: 'ما هو أمر عرض المجلد الحالي في Linux؟',
+                    options: ['ls', 'pwd', 'cd', 'cat'],
+                    correct: 1
+                },
+                {
+                    q: 'أي أمر يستخدم لعرض محتوى ملف نصي؟',
+                    options: ['ls', 'cd', 'cat', 'clear'],
+                    correct: 2
+                },
+                {
+                    q: 'للانتقال إلى مجلد فرعي، نستخدم:',
+                    options: ['ls folder', 'cd folder', 'cat folder', 'pwd folder'],
+                    correct: 1
+                }
+            ];
+
+            let currentQ = 0;
+            let score = 0;
+
+            function initQuiz() {
+                currentQ = 0;
+                score = 0;
+                showQuestion();
+            }
+
+            function showQuestion() {
+                if (currentQ >= questions.length) {
+                    document.getElementById('quiz-container').innerHTML = 
+                        `<div style="text-align:center; padding:30px;">
+                            <div style="font-size:3rem;">🎯</div>
+                            <h3>النتيجة: ${score}/${questions.length}</h3>
+                        </div>`;
+                    document.getElementById('ctf-result').style.display = 'block';
+                    return;
+                }
+
+                const q = questions[currentQ];
+                let html = `<div class="quiz-question">${currentQ + 1}. ${q.q}</div><div class="quiz-options">`;
+                q.options.forEach((opt, i) => {
+                    html += `<div class="quiz-option" data-index="${i}">${String.fromCharCode(65 + i)}. ${opt}</div>`;
+                });
+                html += '</div>';
+                document.getElementById('quiz-container').innerHTML = html;
+
+                document.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.addEventListener('click', function() {
+                        const idx = parseInt(this.dataset.index);
+                        if (idx === q.correct) {
+                            this.classList.add('correct');
+                            CE.audio.success();
+                            CE.agentSpeak('correct');
+                            score++;
+                        } else {
+                            this.classList.add('wrong');
+                            CE.audio.fail();
+                            CE.agentSpeak('wrong');
+                            CE.state.currentSession.mistakes++;
+                        }
+                        setTimeout(() => {
+                            currentQ++;
+                            showQuestion();
+                        }, 1000);
+                    });
+                });
+            }
+
+            // Complete level
+            document.getElementById('complete-level').addEventListener('click', () => {
+                const xp = 100 + (score * 50);
+                CE.completeLevel(1, xp);
+                CE.endSession(true);
+                CE.playStory('cliffhanger', 1, () => {
+                    window.location.href = '../index.html';
+                });
+            });
+
+            // Agent
+            document.getElementById('agent-avatar').addEventListener('click', () => {
+                CE.agentSpeak('hint', '💡 تلميح: اكتب help في التيرمنال لمعرفة الأوامر!');
+            });
+
+            CE.updateHUD();
+        });
+    </script>
+<script>function nextLevel(n){localStorage.setItem("cyberRPG_level",n);localStorage.setItem("cyberRPG_date",new Date().toLocaleString());window.location.href="level"+n+".html";}function prevLevel(n){window.location.href="level"+n+".html";}</script></body>
+</html>

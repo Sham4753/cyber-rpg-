@@ -1,0 +1,133 @@
+        document.addEventListener('DOMContentLoaded', () => {
+            const CE = window.CyberEngine;
+            CE.startSession();
+            CE.updateHUD();
+            
+            // Terminal setup
+            const term = new CE.Terminal('terminal', { prompt: 'agent@cyber-rpg:~$ ' });
+            
+            // Virtual filesystem
+            const fs = {
+                '/': {
+                    type: 'dir',
+                    contents: ['secret_room', 'notes.txt', 'readme.md']
+                },
+                '/secret_room': {
+                    type: 'dir',
+                    contents: ['password.txt', 'clue.txt']
+                },
+                '/notes.txt': {
+                    type: 'file',
+                    content: 'ملاحظات Agent: الباب الإلكتروني محمي بكلمة سر. ابحث في الغرفة السرية!'
+                },
+                '/readme.md': {
+                    type: 'file',
+                    content: 'مرحباً بك في CYBER RPG! استخدم الأوامر للتنقل والاستكشاف.'
+                },
+                '/secret_room/password.txt': {
+                    type: 'file',
+                    content: '🔓 كلمة المرور: CYBER_AGENT_2024'
+                },
+                '/secret_room/clue.txt': {
+                    type: 'file',
+                    content: '💡 تلميح: استخدم cat لقراءة الملفات!'
+                }
+            };
+            
+            let currentDir = '/';
+            let missionComplete = false;
+            
+            function getPath(name) {
+                if (name.startsWith('/')) return name;
+                if (currentDir === '/') return '/' + name;
+                return currentDir + '/' + name;
+            }
+            
+            term.registerCommand('help', () => {
+                term.print('=== الأوامر المتاحة ===', 'success');
+                term.print('pwd     - عرض المجلد الحالي');
+                term.print('ls      - عرض الملفات');
+                term.print('cd [dir]- الانتقال لمجلد');
+                term.print('cat [file]- قراءة ملف');
+                term.print('clear   - مسح الشاشة');
+                term.print('help    - هذا التعليمات');
+            });
+            
+            term.registerCommand('pwd', () => {
+                term.print(currentDir);
+            });
+            
+            term.registerCommand('ls', () => {
+                const path = fs[currentDir];
+                if (path && path.type === 'dir') {
+                    path.contents.forEach(item => {
+                        const itemPath = getPath(item);
+                        const isDir = fs[itemPath] && fs[itemPath].type === 'dir';
+                        term.print((isDir ? '📁 ' : '📄 ') + item);
+                    });
+                }
+            });
+            
+            term.registerCommand('cd', (args) => {
+                if (!args[0] || args[0] === '~') {
+                    currentDir = '/';
+                    term.print('عدت للمجلد الرئيسي');
+                    return;
+                }
+                if (args[0] === '..') {
+                    if (currentDir !== '/') {
+                        currentDir = currentDir.substring(0, currentDir.lastIndexOf('/')) || '/';
+                    }
+                    term.print(currentDir);
+                    return;
+                }
+                const newPath = getPath(args[0]);
+                if (fs[newPath] && fs[newPath].type === 'dir') {
+                    currentDir = newPath;
+                    term.print('دخلت إلى: ' + currentDir);
+                    CE.audio.click();
+                } else {
+                    term.print('خطأ: المجلد غير موجود', 'error');
+                    CE.audio.fail();
+                }
+            });
+            
+            term.registerCommand('cat', (args) => {
+                if (!args[0]) {
+                    term.print('استخدام: cat [اسم الملف]', 'error');
+                    return;
+                }
+                const filePath = getPath(args[0]);
+                if (fs[filePath] && fs[filePath].type === 'file') {
+                    term.print(fs[filePath].content, 'success');
+                    CE.audio.success();
+                    if (filePath === '/secret_room/password.txt' && !missionComplete) {
+                        missionComplete = true;
+                        document.getElementById('mission-complete').style.display = 'block';
+                        CE.agentSpeak('correct', '🎉 رائع! وجدت كلمة المرور!');
+                        CE.addXP(50, 'Mission Complete');
+                    }
+                } else {
+                    term.print('خطأ: الملف غير موجود', 'error');
+                    CE.audio.fail();
+                }
+            });
+            
+            term.registerCommand('clear', () => {
+                term.clear();
+            });
+            
+            // Hint button
+            document.getElementById('hint-btn').addEventListener('click', () => {
+                CE.showSmartHint('جرب كتابة ls ثم cd secret_room', 'terminal');
+            });
+            
+            document.getElementById('reset-terminal').addEventListener('click', () => {
+                currentDir = '/';
+                term.clear();
+                term.print('=== CYBER TERMINAL v3.0 ===', 'success');
+                term.print('اكتب help للمساعدة');
+            });
+            
+            CE.agentSpeak('correct', '👋 مرحباً Agent! جرب أوامر التيرمنال!');
+        });

@@ -29,11 +29,6 @@
             <p class="cyber-subtitle">تعلم البرمجة والاختراق الأخلاقي بأسلوب اللعبة</p>
         </header>
 
-    <div style="background: linear-gradient(90deg, var(--neon-green), var(--neon-blue)); padding: 10px; text-align: center; font-family: var(--font-mono); font-size: 0.9rem; color: var(--dark-bg); font-weight: 700;">
-        🎓 وضع الدرس متاح! اضغط على أي مستوى للتعلم الاحترافي
-    </div>
-    
-
         <!-- HUD -->
         <div class="cyber-hud" id="main-hud">
             <div class="hud-item">
@@ -75,12 +70,13 @@
         </div>
 
         <!-- LEVEL MAP -->
+<div id="cyber-world-map" style="margin:20px auto;max-width:800px;"></div>
         <div class="level-map" id="level-map">
             <div class="level-path"></div>
 
             <!-- Level 1 -->
             <div class="level-node">
-                <a href="levels/level1-lesson.html" class="level-card available" data-level="1">
+                <a href="levels/level1.html" class="level-card available" data-level="1">
                     <div class="level-status" id="status-1"></div>
                     <div class="level-number">1</div>
                     <h3 class="level-title">🔓 Terminal Basics</h3>
@@ -95,7 +91,7 @@
 
             <!-- Level 2 -->
             <div class="level-node">
-                <a href="levels/level2-lesson.html" class="level-card locked" data-level="2">
+                <a href="levels/level2-kids.html" class="level-card locked" data-level="2">
                     <div class="level-status" id="status-2"></div>
                     <div class="level-number">2</div>
                     <h3 class="level-title">📊 Python Variables + Caesar Cipher</h3>
@@ -109,7 +105,7 @@
 
             <!-- Level 3 -->
             <div class="level-node">
-                <a href="levels/level3-lesson.html" class="level-card locked" data-level="3">
+                <a href="levels/level3-kids.html" class="level-card locked" data-level="3">
                     <div class="level-status" id="status-3"></div>
                     <div class="level-number">3</div>
                     <h3 class="level-title">🛡️ If/Else/Elif + Firewall Grid</h3>
@@ -124,7 +120,7 @@
 
             <!-- Level 4 -->
             <div class="level-node">
-                <a href="levels/level4-lesson.html" class="level-card locked" data-level="4">
+                <a href="levels/level4-kids.html" class="level-card locked" data-level="4">
                     <div class="level-status" id="status-4"></div>
                     <div class="level-number">4</div>
                     <h3 class="level-title">🔄 For/While Loops + Port Scanner</h3>
@@ -139,7 +135,7 @@
 
             <!-- Level 5 -->
             <div class="level-node">
-                <a href="levels/level5-lesson.html" class="level-card locked" data-level="5">
+                <a href="levels/level5-kids.html" class="level-card locked" data-level="5">
                     <div class="level-status" id="status-5"></div>
                     <div class="level-number">5</div>
                     <h3 class="level-title">🔧 Functions + Tool Assembly</h3>
@@ -154,7 +150,7 @@
 
             <!-- Level 6 -->
             <div class="level-node">
-                <a href="levels/level6-lesson.html" class="level-card locked" data-level="6">
+                <a href="levels/level6-kids.html" class="level-card locked" data-level="6">
                     <div class="level-status" id="status-6"></div>
                     <div class="level-number">6</div>
                     <h3 class="level-title">🐉 Boss Fight: PHANTOM</h3>
@@ -170,7 +166,7 @@
 
             <!-- Level 7 -->
             <div class="level-node">
-                <a href="levels/level7-lesson.html" class="level-card locked" data-level="7">
+                <a href="levels/level7-kids.html" class="level-card locked" data-level="7">
                     <div class="level-status" id="status-7">🔒</div>
                     <div class="level-number">7</div>
                     <h3 class="level-title">📦 Lists & Dictionaries</h3>
@@ -185,7 +181,7 @@
 
             <!-- Level 8 -->
             <div class="level-node">
-                <a href="levels/level8-lesson.html" class="level-card locked" data-level="8">
+                <a href="levels/level8-kids.html" class="level-card locked" data-level="8">
                     <div class="level-status" id="status-8">🔒</div>
                     <div class="level-number">8</div>
                     <h3 class="level-title">📁 File Handling + Heist</h3>
@@ -200,7 +196,7 @@
 
             <!-- Level 9 -->
             <div class="level-node">
-                <a href="levels/level9-lesson.html" class="level-card locked" data-level="9">
+                <a href="levels/level9-kids.html" class="level-card locked" data-level="9">
                     <div class="level-status" id="status-9">🔒</div>
                     <div class="level-number">9</div>
                     <h3 class="level-title">👁️ Regex + Hawk Eye</h3>
@@ -215,7 +211,7 @@
 
             <!-- Level 10 -->
             <div class="level-node">
-                <a href="levels/level10-lesson.html" class="level-card locked" data-level="10">
+                <a href="levels/level10-kids.html" class="level-card locked" data-level="10">
                     <div class="level-status" id="status-10">🔒</div>
                     <div class="level-number">10</div>
                     <h3 class="level-title">🌐 APIs & JSON + Server Hack</h3>
@@ -231,7 +227,7 @@
 
             <!-- Level 11 -->
             <div class="level-node">
-                <a href="levels/level11-lesson.html" class="level-card locked" data-level="11">
+                <a href="levels/level11-kids.html" class="level-card locked" data-level="11">
                     <div class="level-status" id="status-11">🔒</div>
                     <div class="level-number">11</div>
                     <h3 class="level-title">🕷️ Web Scraping + Info Gathering</h3>
@@ -265,15 +261,6 @@
         <div class="agent-avatar" id="agent-avatar">🤖</div>
     </div>
 
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/firebase-auth.js"></script>
-    <script src="js/firebase-db.js"></script>
-    <script src="js/firebase-leaderboard.js"></script>
     <script src="js/cyber-engine.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -351,27 +338,6 @@
             CE.updateHUD();
         });
     </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Initialize Firebase
-            if (window.FirebaseConfig) {
-                window.FirebaseConfig.init();
-                setTimeout(() => {
-                    window.FirebaseAuth.init();
-                    window.FirebaseAuth.updateAuthUI();
-                }, 1000);
-            }
-            
-            // Leaderboard button
-            const lbBtn = document.getElementById('leaderboard-button');
-            if (lbBtn) {
-                lbBtn.addEventListener('click', () => {
-                    if (window.LeaderboardUI) window.LeaderboardUI.show();
-                });
-            }
-        });
-    </script>
 </body>
 </html>
 <script>
@@ -409,3 +375,11 @@ window.addEventListener('load', function() {
     }
 });
 </script>
+<script src="../js/cyber-mind-engine.js"></script>
+<script src="../js/cyber-map.js"></script>
+<script src="../js/cyber-survival.js"></script>
+<script src="../js/cyber-pro.js"></script>
+<script src="../js/cyber-survival.js"></script>
+<script src="../js/cyber-pro.js"></script>
+<script>document.addEventListener("DOMContentLoaded",()=>{new CyberMap("cyber-world-map");});</script>
+<script src="../js/save-system.js"></script>

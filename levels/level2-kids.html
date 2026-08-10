@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CYBER RPG - Level 2: الصناديق السحرية (المتغيرات)</title>
+    <link rel="stylesheet" href="../css/cyber-theme.css">
+    <style>
+        .box-container { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin: 30px 0; }
+        .magic-box { 
+            background: rgba(0,0,0,0.5); border: 3px dashed #00ff41; border-radius: 20px; 
+            padding: 30px; min-width: 150px; text-align: center; cursor: pointer;
+            transition: all 0.3s; font-size: 1.5rem;
+        }
+        .magic-box:hover { border-color: #ffd700; box-shadow: 0 0 30px rgba(255,215,0,0.5); transform: scale(1.05); }
+        .magic-box.filled { border-style: solid; background: rgba(0,255,65,0.2); }
+        .data-piece { 
+            background: #ffd700; color: #000; padding: 15px 25px; border-radius: 10px; 
+            font-weight: bold; cursor: grab; display: inline-block; margin: 10px;
+            animation: float 2s infinite;
+        }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        .success-popup {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+            background: #00ff41; color: #000; padding: 40px; border-radius: 20px;
+            text-align: center; z-index: 1000; font-size: 2rem; animation: popIn 0.5s;
+        }
+        @keyframes popIn { 0% { transform: translate(-50%,-50%) scale(0); } 100% { transform: translate(-50%,-50%) scale(1); } }
+    </style>
+</head>
+<body>
+    <canvas id="matrix-canvas"></canvas>
+    
+    <div class="cyber-container">
+        <header class="cyber-header">
+            <h1 class="cyber-logo" data-text="LEVEL 2">📦 LEVEL 2</h1>
+            <p class="cyber-subtitle">الصناديق السحرية - تعلم المتغيرات باللعب!</p>
+        </header>
+
+        <!-- HOOK - قصة مشوقة -->
+        <div class="cyber-section" id="story-section">
+            <div style="text-align:center; font-size:3rem;">🚨</div>
+            <h2 style="color:#ff4444; text-align:center;">إنذار! البيانات في خطر!</h2>
+            <p style="text-align:center; font-size:1.2rem;">
+                🤖 <strong>Agent Zero:</strong> "Agent! الـ PHANTOM سرق بياناتك الحيوية!<br>
+                لديك <span style="color:#ffd700;">3 صناديق سحرية</span> لتخزين البيانات قبل أن تضيع للأبد!<br>
+                <span style="color:#00ff41;">اسحب كل بيانات للصندوق الصحيح!</span>"
+            </p>
+        </div>
+
+        <!-- SHOW + PLAY - الصناديق السحرية -->
+        <div class="cyber-section">
+            <h2 style="text-align:center;">🎯 اسحب البيانات للصناديق السحرية</h2>
+            
+            <!-- البيانات المسروقة -->
+            <div style="text-align:center; margin:20px 0;">
+                <p style="color:#ffd700;">📦 بيانات يجب إنقاذها:</p>
+                <div id="data-pieces">
+                    <div class="data-piece" draggable="true" data-type="name" data-value="Agent Cyber">👤 "Agent Cyber"</div>
+                    <div class="data-piece" draggable="true" data-type="age" data-value="25">🔢 25</div>
+                    <div class="data-piece" draggable="true" data-type="level" data-value="99">⭐ 99</div>
+                </div>
+            </div>
+
+            <!-- الصناديق السحرية (المتغيرات) -->
+            <div class="box-container">
+                <div class="magic-box" data-accept="name" id="box-name">
+                    <div style="font-size:3rem;">📝</div>
+                    <p style="color:#00ff41;">صندوق الاسم</p>
+                    <small style="color:#888;">name = ???</small>
+                </div>
+                <div class="magic-box" data-accept="age" id="box-age">
+                    <div style="font-size:3rem;">🔢</div>
+                    <p style="color:#00ff41;">صندوق العمر</p>
+                    <small style="color:#888;">age = ???</small>
+                </div>
+                <div class="magic-box" data-accept="level" id="box-level">
+                    <div style="font-size:3rem;">⭐</div>
+                    <p style="color:#00ff41;">صندوق المستوى</p>
+                    <small style="color:#888;">level = ???</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEARN - شرح مبسط -->
+        <div class="cyber-section" id="learn-section" style="display:none;">
+            <h2 style="text-align:center; color:#ffd700;">🎉 أحسنت! تعلمت المتغيرات!</h2>
+            <div style="text-align:center; font-size:1.2rem; line-height:2;">
+                <p>📦 <strong>المتغير = صندوق سحري</strong></p>
+                <p>📝 <strong>name = "Agent Cyber"</strong> → صندوق الاسم يحمل "Agent Cyber"</p>
+                <p>🔢 <strong>age = 25</strong> → صندوق العمر يحمل 25</p>
+                <p>⭐ <strong>level = 99</strong> → صندوق المستوى يحمل 99</p>
+                <br>
+                <p style="color:#00ff41;">💡 في بايثون: المتغير = اسم = قيمة!</p>
+                <code style="background:#000; padding:10px; border-radius:5px; display:block; margin:10px;">
+                    name = "Agent Cyber"<br>
+                    print(name) ← يطبع: Agent Cyber
+                </code>
+            </div>
+        </div>
+
+        <!-- MISSION COMPLETE -->
+        <div class="cyber-section" id="mission-complete" style="display:none; text-align:center;">
+            <div style="font-size:5rem;">🏆</div>
+            <h2 style="color:#ffd700;">أنقذت البيانات!</h2>
+            <p style="font-size:1.2rem;">تعلمت: <strong>المتغيرات = صناديق سحرية تخزن البيانات!</strong></p>
+            <button class="cyber-btn primary" onclick="nextLevel(3)">➡️ المستوى التالي: إشارة المرور (If/Else)</button>
+        </div>
+
+        <div style="text-align:center; margin:30px 0;">
+            <a href="../index.html" class="cyber-btn">⬅️ العودة للخريطة</a>
+        </div>
+    </div>
+
+    <script>
+        let savedData = { name: false, age: false, level: false };
+        
+        // Drag & Drop
+        document.querySelectorAll('.data-piece').forEach(piece => {
+            piece.addEventListener('dragstart', e => {
+                e.dataTransfer.setData('text/plain', JSON.stringify({
+                    type: piece.dataset.type,
+                    value: piece.dataset.value
+                }));
+            });
+        });
+
+        document.querySelectorAll('.magic-box').forEach(box => {
+            box.addEventListener('dragover', e => {
+                e.preventDefault();
+                box.style.borderColor = '#ffd700';
+            });
+            box.addEventListener('dragleave', e => {
+                box.style.borderColor = '#00ff41';
+            });
+            box.addEventListener('drop', e => {
+                e.preventDefault();
+                const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                if (data.type === box.dataset.accept && !savedData[data.type]) {
+                    savedData[data.type] = data.value;
+                    box.classList.add('filled');
+                    box.querySelector('small').textContent = box.dataset.accept + ' = ' + data.value;
+                    box.querySelector('small').style.color = '#ffd700';
+                    
+                    // إخفاء القطعة المسحوبة
+                    document.querySelector(`[data-type="${data.type}"]`).style.opacity = '0.3';
+                    
+                    checkAllSaved();
+                }
+            });
+        });
+
+        function checkAllSaved() {
+            if (savedData.name && savedData.age && savedData.level) {
+                setTimeout(() => {
+                    document.getElementById('learn-section').style.display = 'block';
+                    document.getElementById('mission-complete').style.display = 'block';
+                    document.getElementById('learn-section').scrollIntoView({ behavior: 'smooth' });
+                    
+                    // حفظ التقدم
+                    if (window.SaveSystem) {
+                        SaveSystem.save(2, { xp: 100 });
+                    }
+                }, 500);
+            }
+        }
+
+        function nextLevel(n) {
+            localStorage.setItem('cyberRPG_level', n);
+            localStorage.setItem('cyberRPG_date', new Date().toLocaleString());
+            window.location.href = 'level' + n + '.html';
+        }
+    </script>
+    <script src="../js/save-system.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+        <!-- INTERACTIVE TERMINAL -->
+        <div class="cyber-section fade-in-up">
+            <h2>💻 محاكي التيرمنال التفاعلي</h2>
+            <p>جرب الأوامر بنفسك! اكتب <code>help</code> لرؤية جميع الأوامر المتاحة.</p>
+            <div class="cyber-terminal" id="terminal" style="margin-top: 20px;"></div>
+            <div style="margin-top: 15px; text-align: center;">
+                <button class="cyber-btn" id="hint-btn">💡 أحتاج تلميحاً</button>
+                <button class="cyber-btn" id="reset-terminal">🔄 إعادة التعيين</button>
+            </div>
+        </div>
