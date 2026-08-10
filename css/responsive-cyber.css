@@ -1,0 +1,103 @@
+/**
+ * ╔══════════════════════════════════════════════════════════════╗
+ * ║    CYBER RESPONSIVE ENGINE - Mobile & Desktop               ║
+ * ╚══════════════════════════════════════════════════════════════╝
+ */
+
+/* ========== MOBILE OPTIMIZATION ========== */
+@media screen and (max-width: 768px) {
+    h1 { font-size: 1.8rem !important; }
+    h2 { font-size: 1.3rem !important; }
+    
+    #market-overlay > div,
+    #arena-overlay > div,
+    #ctf-lab-overlay > div,
+    #soc-dashboard-overlay > div {
+        width: 95% !important;
+        padding: 10px !important;
+        margin: 10px auto !important;
+    }
+    
+    div[style*="grid-template-columns"] {
+        grid-template-columns: 1fr !important;
+    }
+    
+    button[id*="arena"],
+    button[title*="ARENA"] {
+        top: 10px !important;
+        right: 10px !important;
+        transform: none !important;
+        padding: 10px 15px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    button[id*="market"],
+    button[title*="السوق"],
+    button[title*="MARKET"] {
+        top: 60px !important;
+        right: 10px !important;
+        transform: none !important;
+        padding: 10px 15px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    button[id*="pro"],
+    button[title*="PRO"] {
+        bottom: 10px !important;
+        right: 10px !important;
+        padding: 10px 15px !important;
+        font-size: 0.9rem !important;
+    }
+    
+    input[type="text"],
+    input[type="password"] {
+        font-size: 1rem !important;
+        padding: 12px !important;
+    }
+    
+    .cyber-container {
+        padding: 10px !important;
+    }
+}
+
+/* ========== TABLET OPTIMIZATION ========== */
+@media screen and (min-width: 769px) and (max-width: 1024px) {
+    h1 { font-size: 2.2rem !important; }
+    
+    div[style*="grid-template-columns:repeat(4"] {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* ========== SCROLLBAR STYLING ========== */
+::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+::-webkit-scrollbar-track {
+    background: #0a0a0f;
+}
+::-webkit-scrollbar-thumb {
+    background: #ff2d95;
+    border-radius: 10px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: #ffd700;
+}
+
+/* ========== TOUCH FRIENDLY ========== */
+@media (hover: none) and (pointer: coarse) {
+    button, .neon-btn, [onclick] {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* ========== SAFE AREA FOR NOTCH PHONES ========== */
+@supports (padding: max(0px)) {
+    body {
+        padding-left: max(10px, env(safe-area-inset-left));
+        padding-right: max(10px, env(safe-area-inset-right));
+        padding-bottom: max(10px, env(safe-area-inset-bottom));
+    }
+}
