@@ -148,7 +148,7 @@ class CyberDarkMarket {
         `;
         
         overlay.innerHTML = `
-            <div style="max-width:800px; margin:0 auto; padding:20px;">
+            <div style="max-width:100%; margin:0 auto; padding:20px;">
                 <!-- Header -->
                 <div style="text-align:center; margin-bottom:20px;">
                     <h1 style="color:#b829dd; font-size:2.5rem; text-shadow:0 0 20px #b829dd;">🛒 السوق السوداء</h1>

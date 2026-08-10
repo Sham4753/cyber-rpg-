@@ -178,7 +178,7 @@ class CyberPro {
         `).join('');
         
         overlay.innerHTML = `
-            <div style="max-width:800px; margin:0 auto;">
+            <div style="max-width:100%; margin:0 auto;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <h2 style="color:#00ff41;">🏆 مختبر CTF - Capture The Flag</h2>
                     <button onclick="document.getElementById('ctf-lab-overlay').remove()" 
@@ -205,7 +205,7 @@ class CyberPro {
         if (!overlay) return;
         
         overlay.innerHTML = `
-            <div style="max-width:700px; margin:0 auto;">
+            <div style="max-width:100%; margin:0 auto;">
                 <button onclick="window.CyberPro.openCTFLab()" 
                     style="background:transparent; border:2px solid #ffd700; color:#ffd700; padding:10px 20px; border-radius:10px; cursor:pointer; margin-bottom:20px;">
                     ⬅️ العودة للتحديات

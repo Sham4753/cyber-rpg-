@@ -111,7 +111,7 @@ class CyberGangWar {
         `;
         
         overlay.innerHTML = `
-            <div style="max-width:900px; margin:0 auto; padding:20px;">
+            <div style="max-width:100%; margin:0 auto; padding:20px;">
                 <!-- Header -->
                 <div style="text-align:center; margin-bottom:30px;">
                     <h1 style="font-size:3rem; color:#ff2d95; text-shadow:0 0 20px #ff2d95; animation:glowPulse 1s infinite;">
