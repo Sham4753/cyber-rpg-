@@ -486,3 +486,33 @@ document.head.appendChild(gangStyle);
 // Initialize
 window.CyberGangWar = new CyberGangWar();
 console.log('⚔️ Cyber Gang War ready');
+
+// Patch CyberGangWar to use Dark Market loot
+CyberGangWar.prototype._originalAttackSuccess = CyberGangWar.prototype.attackSuccess;
+CyberGangWar.prototype.attackSuccess = function() {
+    // Generate loot
+    if (window.CyberDarkMarket) {
+        const lootItems = window.CyberDarkMarket.stealLootFromPlayer(this.attackInProgress.target);
+        const totalValue = lootItems.reduce((sum, item) => sum + item.value, 0);
+        
+        // Add currency to player
+        window.CyberDarkMarket.inventory.currency += totalValue;
+        window.CyberDarkMarket.saveInventory();
+        
+        // Show loot in success screen
+        const lootDisplay = lootItems.map(l => `${l.name} (+${l.value})`).join('<br>');
+        
+        // Override success display
+        const overlay = document.getElementById('attack-overlay');
+        if (overlay) {
+            const originalContent = overlay.innerHTML;
+            overlay.innerHTML = originalContent.replace('TARGET BREACHED!', 
+                `TARGET BREACHED!<br><small style="color:#ffd700;">${lootDisplay}</small>`);
+        }
+    }
+    
+    // Call original
+    if (this._originalAttackSuccess) {
+        this._originalAttackSuccess();
+    }
+};
